@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Event - Eventify</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">Eventify</a>
+        <nav>
+            <ul id="nav-links"><!-- Links will be injected by script --></ul>
+        </nav>
+    </header>
+
+    <div class="container" style="max-width: 600px; margin: 40px auto; padding: 20px;">
+        <h1>Create New Event</h1>
+        <form id="eventForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="title">Event Title</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="date">Date & Time</label>
+                <input type="datetime-local" id="date" name="date" required>
+            </div>
+
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" name="location" required>
+                <div id="map" style="height: 300px; margin-top: 10px; border-radius: 5px;"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="price">Ticket Price (₹)</label>
+                <input type="number" id="price" name="price" min="0" step="0.01" required>
+            </div>
+
+            <div class="form-group">
+                <label for="totalTickets">Total Tickets Available</label>
+                <input type="number" id="totalTickets" name="totalTickets" min="1" required>
+            </div>
+
+            <div class="form-group">
+                <label>Event Image</label>
+                <input type="file" id="image" name="image" accept="image/*" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="5" required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Create Event</button>
+        </form>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="success-modal">
+        <div class="success-modal-content">
+            <div style="font-size: 50px; margin-bottom: 10px;">✅</div>
+            <h3>Success!</h3>
+            <p>Event created successfully.</p>
+            <button id="modalOkBtn" class="btn-ok">Okay</button>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script type="module" src="js/nav.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user'));
+
+            if (!token || !user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Role-based access control for the page
+            if (user.role !== 'admin' && user.role !== 'organizer') {
+                alert('You are not authorized to create events. Become an organizer from your dashboard.');
+                window.location.href = 'dashboard.html';
+                return;
+            }
+        });
+
+        // Initialize Map
+        const map = L.map('map').setView([51.505, -0.09], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // Get user location
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(position => {
+                map.setView([position.coords.latitude, position.coords.longitude], 13);
+            });
+        }
+
+        let marker;
+        map.on('click', async (e) => {
+            if (marker) map.removeLayer(marker);
+            marker = L.marker(e.latlng).addTo(map);
+            
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${e.latlng.lat}&lon=${e.latlng.lng}`);
+            const data = await response.json();
+            if (data.display_name) document.getElementById('location').value = data.display_name;
+        });
+
+        // Handle Create Event Form Submission
+        document.getElementById('eventForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('You must be logged in to create an event.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const formData = new FormData(e.target);
+
+            try {
+                const response = await fetch('http://127.0.0.1:3000/api/events', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                        // NOTE: Do NOT set 'Content-Type'. The browser will set it
+                        // to 'multipart/form-data' with the correct boundary.
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || data.error || 'Failed to create event');
+                }
+                
+                window.location.href = `event-details.html?id=${data._id}&new=true`;
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+    </script>
+</body>
+</html>

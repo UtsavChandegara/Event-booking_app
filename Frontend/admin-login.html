@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login - Event Booking</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <style>
+    /* Utility classes to manage dynamic states without inline styles */
+    .loading { display: none; }
+    .loading.is-active { display: block; }
+    .form-hint {
+      margin-top: 15px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body class="admin-login-body">
+  <div class="container">
+    <div class="login-card slide-up">
+      <div class="logo">
+        <h1>🎫 Event Booking</h1>
+        <p>Admin Dashboard <span class="badge">ADMIN</span></p>
+      </div>
+
+      <div id="alert-container"></div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" placeholder="admin@example.com" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Enter your password" required>
+        </div>
+
+        <div class="loading" id="loading">
+          <div class="spinner"></div>
+        </div>
+
+        <button type="submit" class="btn-login" id="login-btn">Login as Admin</button>
+      </form>
+
+      <div class="links">
+        <a href="index.html">← Back to Home</a> |
+        <a href="login.html">User Login</a> |
+        <a href="admin-register.html">Register Admin</a> |
+        <a href="forgot-password.html">Forgot Password</a>
+      </div>
+
+      <div class="toggle-form">
+        <p class="form-hint">
+          Demo: Use any admin account credentials
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const BASE_URL = 'http://127.0.0.1:3000/api';
+
+    function showAlert(message, type = 'info') {
+      const alertContainer = document.getElementById('alert-container');
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type}`;
+      alert.textContent = message;
+      alertContainer.innerHTML = '';
+      alertContainer.appendChild(alert);
+      setTimeout(() => alert.remove(), 5000);
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      const loading = document.getElementById('loading');
+      const btn = document.getElementById('login-btn');
+
+      loading.classList.add('is-active');
+      btn.disabled = true;
+
+      try {
+        const response = await fetch(`${BASE_URL}/auth/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Login failed');
+        }
+
+        // Check if user is admin
+        if (data.user.role !== 'admin') {
+          throw new Error('Only administrators can access this dashboard');
+        }
+
+        // Store token and user info
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        showAlert('Login successful! Redirecting to dashboard...', 'success');
+        setTimeout(() => {
+          window.location.href = 'admin-dashboard.html';
+        }, 1500);
+      } catch (error) {
+        showAlert(error.message, 'danger');
+      } finally {
+        loading.classList.remove('is-active');
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

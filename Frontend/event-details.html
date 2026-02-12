@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Details - Eventify</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/event-details.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">Eventify</a>
+        <nav>
+            <ul id="nav-links"></ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <!-- Success Message Container -->
+        <div id="success-message" class="success-banner">
+            <i class="fas fa-check-circle"></i> Event created successfully!
+        </div>
+
+        <div id="event-details" class="event-container">
+            <p class="loading-text">Loading event details...</p>
+        </div>
+    </div>
+
+    <script type="module" src="js/nav.js"></script>
+    
+    <script type="module">
+        const BASE_URL = 'http://127.0.0.1:3000/api';
+        const PLACEHOLDER_800x400 = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22800%22%20height%3D%22400%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20800%20400%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder%20text%20%7B%20fill%3A%23AAAAAA%3Bfont-weight%3Abold%3Bfont-family%3AArial%2C%20Helvetica%2C%20Open%20Sans%2C%20sans-serif%2C%20monospace%3Bfont-size%3A40pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder%22%3E%3Crect%20width%3D%22800%22%20height%3D%22400%22%20fill%3D%22%23EEEEEE%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%22212.5%22%20y%3D%22218%22%3EImage%20Not%20Found%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E`;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const eventId = urlParams.get('id');
+            const isNew = urlParams.get('new');
+            const user = JSON.parse(localStorage.getItem('user'));
+
+            // Show success message if redirected from creation
+            if (isNew) {
+                const banner = document.getElementById('success-message');
+                banner.style.display = 'block';
+                // Remove the query param from URL without refreshing so message doesn't show on reload
+                window.history.replaceState({}, document.title, window.location.pathname + `?id=${eventId}`);
+                setTimeout(() => { banner.style.display = 'none'; }, 5000);
+            }
+
+            if (!eventId) {
+                document.getElementById('event-details').innerHTML = '<p class="error-text">Event not found.</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${BASE_URL}/events/${eventId}`);
+                if (!response.ok) throw new Error('Failed to fetch event');
+                
+                const event = await response.json();
+                let imageUrl = PLACEHOLDER_800x400;
+                if (event.imageUrl) {
+                    let path = event.imageUrl.trim().replace(/\\/g, "/");
+                    const uploadsIndex = path.indexOf("uploads/");
+                    if (uploadsIndex !== -1) {
+                        path = path.substring(uploadsIndex);
+                    }
+                    if (path.startsWith("http") || path.startsWith("data:")) {
+                        imageUrl = path;
+                    } else {
+                        imageUrl = `http://127.0.0.1:3000/${path}`;
+                    }
+                }
+
+                const date = new Date(event.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                const time = new Date(event.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                const availableTickets = (event.totalTickets || 0) - (event.bookedTickets || 0);
+                // Determine if the current user is the event creator
+                const isCreator = user && event.createdBy && user._id === event.createdBy._id;
+                let actionButtonHtml = '';
+
+                if (isCreator) {
+                    actionButtonHtml = `<p class="event-notice creator-notice">You cannot book tickets for your own event.</p>`;
+                } else if (availableTickets <= 0) {
+                    actionButtonHtml = `<p class="event-notice sold-out-notice">Sold Out!</p>`;
+                } else {
+                    actionButtonHtml = `
+                        <div class="ticket-booking-form">
+                            <div class="form-group">
+                                <label for="ticket-quantity">Quantity</label>
+                                <input type="number" id="ticket-quantity" name="quantity" value="1" min="1" max="${availableTickets}">
+                            </div>
+                            <button id="book-btn" class="btn btn-primary">Book Tickets</button>
+                        </div>
+                        <p class="tickets-remaining">${availableTickets} tickets remaining.</p>
+                    `;
+                }
+
+                document.getElementById('event-details').innerHTML = `
+                    <img src="${imageUrl}" alt="${event.title}" class="event-header-image" onerror="this.onerror=null;this.src='${PLACEHOLDER_800x400}';">
+                    <div class="event-content">
+                        <h1>${event.title}</h1>
+                        <div class="event-meta">
+                            <span><i class="fas fa-calendar-alt"></i> ${date} at ${time}</span>
+                            <span><i class="fas fa-map-marker-alt"></i> ${event.location}</span>
+                        </div>
+                        <div class="price-tag">₹${event.price}</div>
+                        <h3>About this Event</h3>
+                        <p class="event-description">${event.description}</p>
+                        
+                        <div class="event-actions">
+                            ${actionButtonHtml}
+                        </div>
+                    </div>
+                `;
+
+                // Add booking functionality
+                const bookBtn = document.getElementById('book-btn');
+                if (bookBtn) {
+                    bookBtn.addEventListener('click', async () => {
+                        const quantity = document.getElementById('ticket-quantity').value;
+                        // Redirect to the seat selection page with eventId and quantity
+                        window.location.href = `seat-selection.html?eventId=${eventId}&quantity=${quantity}`;
+                    });
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById('event-details').innerHTML = '<p class="error-text">Error loading event details.</p>';
+            }
+        });
+    </script>
+</body>
+</html>

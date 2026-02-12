@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Eventify</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">Eventify</a>
+        <nav>
+            <ul id="nav-links">
+                <!-- Links will be injected by script -->
+            </ul>
+        </nav>
+    </header>
+
+    <div class="register-container">
+        <div class="register-form">
+            <h2>Create Account</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                    <div class="error-message" id="username-error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required>
+                    <div class="error-message" id="email-error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                    <div class="error-message" id="password-error"></div>
+                </div>
+                <button type="submit" class="submit-btn">Register</button>
+                <div class="form-footer">
+                    <p>Already have an account? <a href="login.html">Login</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="js/nav.js"></script>
+
+    <script type="module">
+        import api from './js/api.js';
+
+        const registerForm = document.getElementById('registerForm');
+        const usernameError = document.getElementById('username-error');
+        const emailError = document.getElementById('email-error');
+        const passwordError = document.getElementById('password-error');
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Clear previous errors
+            usernameError.textContent = '';
+            emailError.textContent = '';
+            passwordError.textContent = '';
+
+            const userData = {
+                username: document.getElementById('username').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                password: document.getElementById('password').value.trim()
+            };
+
+            try {
+                const response = await api.register(userData);
+                if (response.token) {
+                    const username = document.getElementById('username').value;
+                    window.location.href = `login.html?registered=true&username=${encodeURIComponent(username)}`;
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                if (error.data && error.data.errors) {
+                    error.data.errors.forEach(err => {
+                        if (err.path === 'username') {
+                            usernameError.textContent = err.msg;
+                        } else if (err.path === 'email') {
+                            emailError.textContent = err.msg;
+                        } else if (err.path === 'password') {
+                            passwordError.textContent = err.msg;
+                        }
+                    });
+                } else {
+                    alert('An unknown error occurred. Please try again.');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Account - Eventify</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="css/account.css" />
+    <!-- Add your account-specific CSS -->
+  </head>
+  <body>
+    <header>
+        <a href="index.html" class="logo">Eventify</a>
+        <nav>
+            <ul id="nav-links">
+                <!-- Links will be injected by script -->
+            </ul>
+        </nav>
+    </header>
+
+    <main class="account-container">
+      <h1>My Account</h1>
+
+      <!-- Alert container for feedback -->
+      <div id="alert-container"></div>
+
+      <!-- Horizontal Tab Bar -->
+      <div class="account-tabs">
+        <button class="tab-btn active" onclick="switchTab('profile')">Profile</button>
+        <button class="tab-btn" onclick="switchTab('bookings')">My Bookings</button>
+        <button class="tab-btn" id="my-events-tab-btn" style="display: none" onclick="switchTab('my-events')">My Events</button>
+        <button class="tab-btn" onclick="switchTab('settings')">Settings</button>
+        <button class="btn-logout" onclick="logout()">Logout</button>
+      </div>
+
+      <!-- Main Content Area -->
+      <div class="account-content">
+        <!-- Profile Tab -->
+        <div id="profile" class="tab-content active">
+          <h2>User Profile</h2>
+          <div id="profile-details-container" class="card">
+            <p>Loading profile...</p>
+          </div>
+          <button class="btn" id="edit-profile-btn">Edit Profile</button>
+        </div>
+
+        <!-- Bookings Tab -->
+        <div id="bookings" class="tab-content">
+          <h2>My Bookings</h2>
+          <div class="filter-bar">
+            <button class="filter-btn active" data-status="all">All</button>
+            <button class="filter-btn" data-status="upcoming">Upcoming</button>
+            <button class="filter-btn" data-status="past">Past</button>
+          </div>
+          <div id="bookings-container">
+            <p>Loading bookings...</p>
+          </div>
+        </div>
+
+        <!-- My Created Events Tab -->
+        <div id="my-events" class="tab-content">
+          <h2>My Created Events</h2>
+          <div id="created-events-container">
+            <p>Loading your created events...</p>
+          </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings" class="tab-content">
+          <h2>Account Settings</h2>
+          <div class="card">
+            <h3>Change Password</h3>
+            <form id="change-password-form">
+              <div class="form-group">
+                <label for="current-password">Current Password</label>
+                <input type="password" id="current-password" required minlength="6" />
+              </div>
+              <div class="form-group">
+                <label for="new-password">New Password</label>
+                <input type="password" id="new-password" required minlength="6" />
+              </div>
+              <div class="form-group">
+                <label for="confirm-password">Confirm New Password</label>
+                <input type="password" id="confirm-password" required />
+              </div>
+              <button type="submit" class="btn">Change Password</button>
+            </form>
+          </div>
+          <div class="card danger-zone">
+            <h3>Delete Account</h3>
+            <p>
+              Permanently delete your account and all associated data. This
+              action cannot be undone.
+            </p>
+            <button class="btn btn-danger" id="delete-account-btn">
+              Delete My Account
+            </button>
+          </div>
+          <!-- Organizer Request Section -->
+          <div id="organizer-section" class="card" style="display: none">
+            <!-- Content will be injected by JS -->
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Edit Profile Modal -->
+    <div id="edit-profile-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2>Edit Profile</h2>
+        <form id="edit-profile-form">
+          <div class="form-group">
+            <label for="edit-username">Username</label>
+            <input type="text" id="edit-username" required minlength="3" />
+          </div>
+          <div class="form-group">
+            <label for="edit-email">Email</label>
+            <input type="email" id="edit-email" required />
+          </div>
+          <div class="form-group">
+            <label for="edit-phone">Phone Number (Optional)</label>
+            <input type="tel" id="edit-phone" />
+          </div>
+          <div class="form-group">
+            <label for="edit-city">City (Optional)</label>
+            <input type="text" id="edit-city" />
+          </div>
+          <button type="submit" class="btn">Save Changes</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- E-Ticket Modal -->
+    <div id="eticket-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2>E-Ticket</h2>
+        <div id="eticket-content">
+          <!-- E-ticket details will be rendered here -->
+        </div>
+        <button class="btn" onclick="window.print()">Print Ticket</button>
+      </div>
+    </div>
+
+    <!-- Attendees Modal -->
+    <div id="attendeesModal" class="modal">
+      <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2 id="attendees-modal-title">Event Attendees</h2>
+        <div id="attendees-list-container">
+          <!-- Attendee list will be rendered here -->
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <!-- Your existing footer -->
+    </footer>
+
+    <script type="module" src="js/nav.js"></script>
+    <script type="module" src="js/account.js"></script>
+  </body>
+</html>

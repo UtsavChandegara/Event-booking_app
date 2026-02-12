@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Seats - Eventify</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .seat-selection-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .booking-summary {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #f1f1f1;
+            text-align: center;
+        }
+        .booking-summary p {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+        .booking-summary span {
+            font-weight: bold;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">Eventify</a>
+        <nav>
+            <ul id="nav-links">
+                <!-- Links will be injected by script -->
+            </ul>
+        </nav>
+    </header>
+
+    <div class="seat-selection-container">
+        <h1 id="event-title-heading">Confirm Your Booking</h1>
+        <p id="event-subtitle" style="text-align: center; color: #666;">Loading event details...</p>
+
+        <div class="booking-summary">
+            <p>You are booking <span id="seat-count">0</span> ticket(s) for a total of <span id="total-price">₹0</span></p>
+            <button class="btn btn-primary" id="checkout-btn">Proceed to Payment</button>
+        </div>
+    </div>
+
+    <script type="module" src="js/nav.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const BASE_URL = 'http://127.0.0.1:3000/api';
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const eventId = urlParams.get('eventId');
+            const quantity = parseInt(urlParams.get('quantity'), 10) || 1;
+
+            const seatCountEl = document.getElementById('seat-count');
+            const totalPriceEl = document.getElementById('total-price');
+            const checkoutBtn = document.getElementById('checkout-btn');
+            const eventTitleHeading = document.getElementById('event-title-heading');
+            const eventSubtitle = document.getElementById('event-subtitle');
+
+            if (!eventId) {
+                eventSubtitle.innerHTML = '<p style="color: red; text-align: center;">No Event ID provided.</p>';
+                return;
+            }
+
+            let TICKET_PRICE = 0;
+            let availableTickets = 0;
+
+            try {
+                const response = await fetch(`${BASE_URL}/events/${eventId}`);
+                if (!response.ok) throw new Error('Failed to fetch event details');
+                const event = await response.json();
+                
+                TICKET_PRICE = event.price;
+                availableTickets = (event.totalTickets || 0) - (event.bookedTickets || 0);
+
+                eventTitleHeading.textContent = `Confirm Booking for ${event.title}`;
+                eventSubtitle.innerHTML = `You are booking <strong>${quantity}</strong> ticket(s).<br><span style="font-size: 0.9rem;">${availableTickets} seats remaining.</span>`;
+
+                if (availableTickets < quantity) {
+                    checkoutBtn.disabled = true;
+                    checkoutBtn.textContent = 'Not Enough Tickets';
+                    eventSubtitle.innerHTML += `<br><strong style="color: red;">There are not enough tickets available for this quantity.</strong>`;
+                } else {
+                    updateSummary();
+                }
+
+            } catch (error) {
+                console.error(error);
+                eventSubtitle.textContent = 'Could not load event details.';
+                return;
+            }
+
+            function updateSummary() {
+                seatCountEl.textContent = quantity;
+                totalPriceEl.textContent = `₹${quantity * TICKET_PRICE}`;
+                checkoutBtn.disabled = false;
+                checkoutBtn.textContent = 'Proceed to Payment';
+            }
+
+            checkoutBtn.addEventListener('click', async () => {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    alert('Please log in to proceed with the booking.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                try {
+                    checkoutBtn.disabled = true;
+                    checkoutBtn.textContent = 'Processing...';
+
+                    const response = await fetch(`${BASE_URL}/bookings/checkout-session`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            eventId: eventId,
+                            seats: [], // No seat selection UI
+                            quantity: quantity
+                        })
+                    });
+
+                    const session = await response.json();
+
+                    if (response.ok && session.url) {
+                        // Redirect to Stripe checkout page
+                        window.location.href = session.url;
+                    } else {
+                        throw new Error(session.error || 'Could not initiate payment. Please try again.');
+                    }
+                } catch (error) {
+                    alert(error.message);
+                    checkoutBtn.disabled = false;
+                    updateSummary(); // Reset button text and state
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>

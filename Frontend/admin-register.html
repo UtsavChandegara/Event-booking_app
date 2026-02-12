@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Register - Event Booking</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin-login-body">
+  <div class="container">
+    <div class="login-card slide-up">
+      <div class="logo">
+        <h1>🎫 Event Booking</h1>
+        <p>Create Admin Account <span class="badge">ADMIN</span></p>
+      </div>
+
+      <div id="alert-container"></div>
+
+      <form id="register-form">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" placeholder="Admin Name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" placeholder="admin@example.com" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Create a strong password" required>
+        </div>
+
+        <div class="form-group">
+          <label for="adminSecret">Admin Secret Key</label>
+          <input type="password" id="adminSecret" placeholder="Enter secret key provided by IT" required>
+        </div>
+
+        <button type="submit" class="btn-login" id="register-btn">Register Admin</button>
+      </form>
+
+      <div class="links">
+        <a href="admin-login.html">Back to Login</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const BASE_URL = 'http://127.0.0.1:3000/api';
+
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const adminSecret = document.getElementById('adminSecret').value;
+      const alertContainer = document.getElementById('alert-container');
+
+      try {
+        const response = await fetch(`${BASE_URL}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, email, password, role: 'admin', adminSecret }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          // Handle array of errors (from express-validator or duplicate key check)
+          if (data.errors && Array.isArray(data.errors)) {
+            throw new Error(data.errors.map(err => err.msg).join(', '));
+          }
+          // Handle single error message
+          throw new Error(data.error || 'Registration failed');
+        }
+
+        alertContainer.innerHTML = `<div class="alert alert-success">Admin registered! Redirecting...</div>`;
+        setTimeout(() => window.location.href = 'admin-login.html', 1500);
+      } catch (error) {
+        alertContainer.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+      }
+    });
+  </script>
+</body>
+</html>
