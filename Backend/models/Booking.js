@@ -18,18 +18,29 @@ const bookingSchema = new mongoose.Schema(
         seat: Number,
       },
     ],
+    // Current no-payment flow uses tickets/totalPrice.
+    tickets: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+    // Keep quantity for backward compatibility with older records/logic.
     quantity: {
       type: Number,
-      required: true,
     },
-    totalAmount: {
+    totalPrice: {
       type: Number,
       required: true,
+      min: 0,
+    },
+    // Legacy payment field; not required in direct-booking mode.
+    totalAmount: {
+      type: Number,
     },
     stripeCheckoutSessionId: {
       type: String,
-      required: true,
       unique: true,
+      sparse: true,
     },
   },
   {
@@ -37,7 +48,10 @@ const bookingSchema = new mongoose.Schema(
   },
 );
 
-// Prevent duplicate bookings for the same payment session
-bookingSchema.index({ stripeCheckoutSessionId: 1 });
+// Prevent duplicate bookings for the same payment session when present
+bookingSchema.index(
+  { stripeCheckoutSessionId: 1 },
+  { unique: true, sparse: true },
+);
 
 module.exports = mongoose.model("Booking", bookingSchema);

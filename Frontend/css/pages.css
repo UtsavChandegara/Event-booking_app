@@ -1,0 +1,51 @@
+@import url('variables.css');
+
+/* General content box for simple pages like success, seat-selection */
+.content-box {
+    max-width: 800px;
+    margin: var(--space-6) auto;
+    padding: var(--space-5);
+    background: var(--bg-surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+}
+
+.content-box h1, .content-box h2 {
+    margin-bottom: var(--space-3);
+}
+
+/* Styles for seat-selection.html */
+.booking-summary {
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.booking-summary p {
+    font-size: 1.2rem;
+    margin-bottom: var(--space-3);
+    color: var(--text-primary);
+}
+
+.booking-summary span {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+/* Styles for success.html */
+.success-container .icon {
+    font-size: 60px;
+    margin-bottom: var(--space-3);
+}
+
+.loader {
+    border: 4px solid var(--bg-main);
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: var(--space-3) auto;
+}

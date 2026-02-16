@@ -209,19 +209,6 @@ const api = {
     return response.json();
   },
 
-  getBookingsByUser: async () => {
-    const token = localStorage.getItem("token");
-    const response = await fetch(`${API_URL}/bookings`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (!response.ok) {
-      throw new Error("Failed to fetch user bookings");
-    }
-    return response.json();
-  },
-
   cancelBooking: async (bookingId, token) => {
     const response = await fetch(`${API_URL}/bookings/${bookingId}`, {
       method: "DELETE",

@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eventify - Home</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="css/index.css">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- Leaflet CSS for the map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -16,42 +14,31 @@
 <body>
 
     <header>
-        <a href="index.html" class="logo">Eventify</a>
-        <nav>
-            <ul id="nav-links">
-                <!-- Links will be injected by script -->
-            </ul>
-        </nav>
+        <div class="container">
+            <a href="index.html" class="logo">Eventify</a>
+            <nav>
+                <ul id="nav-links">
+                    <!-- Links will be injected by script -->
+                </ul>
+            </nav>
+        </div>
     </header>
 
     <main>
         <section class="hero">
-            <h1>Discover and Book Amazing Events</h1>
-            <p>From concerts to conferences – find events you'll love!</p>
-            <a href="events.html" class="btn btn-primary">Explore Events</a>
+            <div class="container">
+                <h1>Discover and Book Amazing Events</h1>
+                <p>From concerts to conferences – find events you'll love!</p>
+                <a href="events.html" class="btn btn-primary">Explore Events</a>
+            </div>
         </section>
 
-        <section class="features-overview">
-            <div class="events-grid">
-                <div class="event-card">
-                    <div class="event-card-content">
-                        <i class="fas fa-calendar-days feature-icon"></i>
-                        <h3>Upcoming Events</h3>
-                        <p>Explore our curated list of events happening near you.</p>
-                    </div>
-                </div>
-                <div class="event-card">
-                    <div class="event-card-content">
-                        <i class="fas fa-globe feature-icon"></i>
-                        <h3>Local & Global</h3>
-                        <p>Find events across your city or anywhere you travel.</p>
-                    </div>
-                </div>
-                <div class="event-card">
-                    <div class="event-card-content">
-                        <i class="fas fa-ticket feature-icon"></i>
-                        <h3>Easy Booking</h3>
-                        <p>Book tickets in seconds with our user-friendly interface.</p>
+        <section class="upcoming-section">
+            <div class="container">
+                <h2>Upcoming Events</h2>
+                <div class="carousel-container">
+                    <div class="carousel-track" id="carousel-track">
+                        <!-- Event cards will be dynamically loaded here by JavaScript -->
                     </div>
                 </div>
             </div>
@@ -59,7 +46,7 @@
     </main>
 
     <section class="map-showcase">
-        <div class="map-showcase-container">
+        <div class="container map-showcase-container">
             <div class="map-showcase-content">
                 <h2>Explore Your World</h2>
                 <p>
@@ -83,7 +70,7 @@
     </section>
 
     <footer>
-        <div class="footer-container">
+        <div class="container footer-container">
             <div class="footer-section">
                 <h3>About Eventify</h3>
                 <p>Your one-stop platform for discovering and booking events. From local meetups to global conferences, we've got you covered.</p>
@@ -113,6 +100,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
      crossorigin=""></script>
+
     <script type="module" src="js/nav.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -145,8 +133,91 @@
             } else {
                 console.log("Your browser doesn't support geolocation.");
             }
+
+            // --- Carousel Logic ---
+            const track = document.getElementById('carousel-track');
+            const carouselContainer = track.parentElement;
+            let intervalId;
+
+            const fetchUpcomingEvents = async () => {
+                try {
+                    const response = await fetch('http://127.0.0.1:3000/api/events');
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    const events = await response.json();
+                    const now = new Date();
+                    return events.filter(e => new Date(e.date) >= now).slice(0, 10); // Get first 10 upcoming
+                } catch (error) {
+                    console.error("Failed to fetch upcoming events:", error);
+                    track.innerHTML = `<p>Could not load events.</p>`;
+                    return [];
+                }
+            };
+
+            const renderCarouselCards = (events) => {
+                if (events.length === 0) {
+                    track.innerHTML = `<p>No upcoming events found.</p>`;
+                    return;
+                }
+                track.innerHTML = events.map(event => `
+                    <div class="event-card">
+                        <div class="event-card-content">
+                            <i class="fas fa-calendar-alt feature-icon"></i>
+                            <h3>${event.title}</h3>
+                            <p>${new Date(event.date).toLocaleDateString()}</p>
+                            <div class="event-card-footer">
+                                <a href="event-details.html?id=${event._id}" class="btn btn-primary">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            };
+
+            const initializeCarousel = (events) => {
+                if (events.length <= 3) return; // No need to rotate if there are few cards
+
+                // Clone cards for infinite loop effect
+                const cards = Array.from(track.children);
+                cards.forEach(card => {
+                    const clone = card.cloneNode(true);
+                    track.appendChild(clone);
+                });
+
+                let currentIndex = 0;
+                const cardWidth = cards[0].offsetWidth;
+                const gap = 24;
+
+                const slide = () => {
+                    currentIndex++;
+                    track.style.transition = 'transform 0.6s ease';
+                    track.style.transform = `translateX(-${currentIndex * (cardWidth + gap)}px)`;
+
+                    if (currentIndex === cards.length) {
+                        setTimeout(() => {
+                            track.style.transition = 'none';
+                            currentIndex = 0;
+                            track.style.transform = `translateX(0)`;
+                        }, 600);
+                    }
+                };
+
+                const startRotation = () => {
+                    stopRotation(); // Ensure no multiple intervals are running
+                    intervalId = setInterval(slide, 4000);
+                };
+
+                const stopRotation = () => clearInterval(intervalId);
+
+                carouselContainer.addEventListener('mouseenter', stopRotation);
+                carouselContainer.addEventListener('mouseleave', startRotation);
+
+                startRotation();
+            };
+
+            fetchUpcomingEvents().then(events => {
+                renderCarouselCards(events);
+                initializeCarousel(events);
+            });
         });
     </script>
-
 </body>
 </html>

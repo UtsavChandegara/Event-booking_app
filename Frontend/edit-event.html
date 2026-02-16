@@ -9,15 +9,17 @@
 </head>
 <body>
     <header>
-        <a href="index.html" class="logo">Eventify</a>
-        <nav>
-            <ul id="nav-links"><!-- Links will be injected by script --></ul>
-        </nav>
+        <div class="container">
+            <a href="index.html" class="logo">Eventify</a>
+            <nav>
+                <ul id="nav-links"><!-- Links will be injected by script --></ul>
+            </nav>
+        </div>
     </header>
 
-    <div class="container" style="max-width: 600px; margin: 40px auto; padding: 20px;">
+    <div class="container" style="max-width: 700px;">
         <h1>Edit Event</h1>
-        <form id="editEventForm" enctype="multipart/form-data">
+        <form id="editEventForm" enctype="multipart/form-data" class="card">
             <div class="form-group">
                 <label for="title">Event Title</label>
                 <input type="text" id="title" name="title" required>
@@ -54,17 +56,17 @@
                 <textarea id="description" name="description" rows="5" required></textarea>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width: 100%;">Update Event</button>
+            <button type="submit" class="btn btn-primary submit-btn">Update Event</button>
         </form>
     </div>
 
     <!-- Success Modal -->
-    <div id="successModal" class="success-modal">
-        <div class="success-modal-content">
+    <div id="successModal" class="modal">
+        <div class="modal-content" style="text-align: center;">
             <div style="font-size: 50px; margin-bottom: 10px;">✅</div>
             <h3>Success!</h3>
             <p>Event updated successfully.</p>
-            <button id="modalOkBtn" class="btn-ok">Okay</button>
+            <button id="modalOkBtn" class="btn btn-primary">Okay</button>
         </div>
     </div>
 
@@ -147,9 +149,9 @@
                 if (!response.ok) throw new Error('Failed to update event');
                 
                 const modal = document.getElementById('successModal');
-                modal.style.display = 'flex';
+                modal.classList.add('active');
                 document.getElementById('modalOkBtn').onclick = function() {
-                    window.location.href = 'events.html';
+                    window.location.href = `event-details.html?id=${eventId}`;
                 };
             } catch (error) {
                 alert(error.message);

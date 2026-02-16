@@ -2,30 +2,28 @@
 
 Eventify is a full-stack web application that allows users to browse, create, and book events. It features a user-friendly interface for event management and a robust backend to handle user authentication, event data, and bookings.
 
-## Features
+## ✨ Features
 
-*   **User Authentication:** Secure user registration and login system using JWT for authentication.
-*   **Event Management:**
-    *   Browse and view a list of available events.
-    *   Create new events with details like title, description, date, location, and an image upload feature.
-    *   View detailed information for a single event.
-*   **Event Booking:**
-    *   Users can book tickets for their desired events.
-    *   View a dashboard of all booked events.
-*   **Admin Capabilities:** (Assumed based on `Admin.js` model) Admins have privileges to manage all events and users.
+- **User Authentication:** Secure user registration and login system using JWT for authentication.
+- **Event Management:**
+  - Browse and view a list of available events.
+  - Create new events with details like title, description, date, location, and an image upload feature.
+  - View detailed information for a single event.
+- **Event Booking:**
+  - Users can book tickets for their desired events.
+  - View a dashboard of all booked events.
+- **Admin Capabilities:** Admins have privileges to manage all events and users.
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-*   **Frontend:** HTML, CSS, JavaScript
-*   **Backend:** Node.js, Express.js
-*   **Database:** MongoDB with Mongoose
-*   **Libraries:**
-    *   `bcryptjs` for password hashing
-    *   `jsonwebtoken` (JWT) for authentication
-    *   `multer` for handling file uploads
-    *   `cors` for enabling cross-origin requests
+- **Frontend:** HTML, CSS, JavaScript
+- **Backend:** Node.js, Express.js
+- **Database:** MongoDB with Mongoose
+- **Authentication:** `bcryptjs` for password hashing, `jsonwebtoken` (JWT) for token-based auth.
+- **File Uploads:** `multer` for handling `multipart/form-data`.
+- **Middleware:** `cors` for enabling Cross-Origin Resource Sharing.
 
-## Getting Started
+## 🚀 Getting Started
 
 Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
 
@@ -33,62 +31,64 @@ Follow these instructions to get a copy of the project up and running on your lo
 
 You need to have the following software installed on your system:
 
-*   [Node.js](https://nodejs.org/) (which includes npm)
-*   [MongoDB](https://www.mongodb.com/try/download/community) (or a MongoDB Atlas cloud account)
+- Node.js (v14 or newer)
+- npm (comes with Node.js)
+- MongoDB (or a MongoDB Atlas cloud account)
 
-### Installation
+### Installation & Setup
 
 1.  **Clone the repository:**
+
     ```bash
     git clone https://github.com/your-username/Event-booking_app.git
     cd Event-booking_app
     ```
 
 2.  **Install Backend Dependencies:**
-    Navigate to the `Backend` directory and install the required npm packages.
+    Navigate to the `Backend` directory and install the required `npm` packages.
+
     ```bash
     cd Backend
     npm install
     ```
 
 3.  **Set up Environment Variables:**
-    Create a `.env` file inside the `Backend` directory and add the following variables. Replace the placeholder values with your actual data.
-    ```
+    Create a `.env` file in the `Backend` directory and add the following variables, replacing the placeholder values with your actual data.
+    ```env
     PORT=3000
     MONGO_URI=your_mongodb_connection_string
-    JWT_SECRET=your_jwt_secret
+    JWT_SECRET=your_super_secret_jwt_key
     ADMIN_SECRET=your_admin_secret_key
     ```
 
-## Running the Application
+## 🏃 Running the Application
 
 1.  **Start the Backend Server:**
-    From the `Backend` directory, run the following command to start the server with `nodemon`, which will automatically restart on file changes.
+    From the `Backend` directory, run the development server. It uses `nodemon` to automatically restart on file changes.
+
     ```bash
     npm run dev
     ```
+
     The server will start on the port you specified in your `.env` file (e.g., `http://localhost:3000`).
 
 2.  **Launch the Frontend:**
-    Open the `Frontend` directory and simply open the `index.html` file in your web browser.
+    Navigate to the `Frontend` directory and open the `index.html` file in your web browser.
 
-    You can also serve the `Frontend` directory using a live server extension in your code editor to handle automatic reloads.
+    For a better development experience with live-reloading, you can use a tool like the Live Server extension for VS Code.
 
-## API Endpoints
+## 📝 API Endpoints
 
 The backend exposes the following REST API endpoints:
 
-*   **Auth Routes (`/api/auth`)**
-    *   `POST /register`: Register a new user.
-    *   `POST /login`: Log in a user.
-
-*   **Event Routes (`/api/events`)**
-    *   `GET /`: Get all events.
-    *   `GET /:id`: Get a single event by its ID.
-    *   `POST /`: Create a new event (protected).
-    *   `PUT /:id`: Update an event (protected).
-    *   `DELETE /:id`: Delete an event (protected).
-
-*   **Booking Routes (`/api/bookings`)**
-    *   `GET /`: Get all bookings for the logged-in user (protected).
-    *   `POST /`: Create a new booking for an event (protected).
+| Method   | Endpoint             | Description                        | Protected |
+| :------- | :------------------- | :--------------------------------- | :-------- |
+| `POST`   | `/api/auth/register` | Register a new user.               | No        |
+| `POST`   | `/api/auth/login`    | Log in a user and get a token.     | No        |
+| `GET`    | `/api/events`        | Get all events.                    | No        |
+| `GET`    | `/api/events/:id`    | Get a single event by its ID.      | No        |
+| `POST`   | `/api/events`        | Create a new event.                | Yes       |
+| `PUT`    | `/api/events/:id`    | Update an event.                   | Yes       |
+| `DELETE` | `/api/events/:id`    | Delete an event.                   | Yes       |
+| `GET`    | `/api/bookings`      | Get all bookings for the user.     | Yes       |
+| `POST`   | `/api/bookings`      | Create a new booking for an event. | Yes       |

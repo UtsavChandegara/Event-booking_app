@@ -1,5 +1,7 @@
 const BASE_URL = "http://127.0.0.1:3000/api";
 let currentEditEventId = null;
+let allEventsMap = new Map();
+let allRequestsMap = new Map();
 
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
@@ -98,6 +100,9 @@ async function loadOrganizerRequests() {
     const container = document.getElementById("requests-container");
     const countBadge = document.getElementById("requests-count-badge");
 
+    // Store requests in a map for easy lookup
+    allRequestsMap = new Map(requests.map((r) => [r._id, r]));
+
     if (countBadge) {
       countBadge.textContent = requests.length;
       countBadge.style.display = requests.length > 0 ? "inline-block" : "none";
@@ -123,8 +128,8 @@ async function loadOrganizerRequests() {
           <td>${date}</td>
           <td>
             <div class="btn-group">
-              <button class="btn btn-edit" onclick="approveRequest('${request._id}', '${request.username}')">Approve</button>
-              <button class="btn btn-delete" onclick="rejectRequest('${request._id}', '${request.username}')">Reject</button>
+              <button class="btn btn-edit" onclick="approveRequest('${request._id}')">Approve</button>
+              <button class="btn btn-delete" onclick="rejectRequest('${request._id}')">Reject</button>
             </div>
           </td>
         </tr>
@@ -148,6 +153,8 @@ async function loadEvents() {
     if (!response.ok) throw new Error("Failed to load events");
 
     const events = await response.json();
+    // Store events in a map for easy lookup
+    allEventsMap = new Map(events.map((e) => [e._id, e]));
 
     const now = new Date();
     const upcomingEvents = events.filter((e) => new Date(e.date) >= now);
@@ -199,17 +206,9 @@ function renderEventsList(events, containerId, emptyMessage) {
           }</span></td>
           <td>
             <div class="btn-group">
-              <button class="btn btn-edit" onclick="openEditEvent('${
-                event._id
-              }', '${event.title}', '${event.date}', '${event.location}', '${
-                event.description
-              }', ${event.price}, ${event.totalTickets})">Edit</button>
-              <button class="btn btn-edit" onclick="viewEventBookings('${
-                event._id
-              }', '${event.title}')">Bookings</button>
-              <button class="btn btn-delete" onclick="deleteEvent('${
-                event._id
-              }', '${event.title}')">Delete</button>
+              <button class="btn btn-edit" onclick="openEditEvent('${event._id}')">Edit</button>
+              <button class="btn btn-edit" onclick="viewEventBookings('${event._id}')">Bookings</button>
+              <button class="btn btn-delete" onclick="deleteEvent('${event._id}')">Delete</button>
             </div>
           </td>
         </tr>
@@ -313,7 +312,7 @@ async function loadActiveUsers() {
 }
 
 // Switch tabs
-function switchTab(tabName) {
+function switchTab(tabName, clickedButton) {
   // Hide all tabs
   document.querySelectorAll(".tab-content").forEach((tab) => {
     tab.classList.remove("active");
@@ -326,7 +325,12 @@ function switchTab(tabName) {
 
   // Show selected tab
   document.getElementById(tabName).classList.add("active");
-  event.target.classList.add("active");
+  const activeButton =
+    clickedButton ||
+    document.querySelector(`.tab-btn[onclick*="switchTab('${tabName}'"]`);
+  if (activeButton) {
+    activeButton.classList.add("active");
+  }
 
   // Reload data for the selected tab
   if (tabName === "events") {
@@ -341,24 +345,22 @@ function switchTab(tabName) {
 }
 
 // Open edit event modal
-function openEditEvent(
-  id,
-  title,
-  date,
-  location,
-  description,
-  price,
-  totalTickets,
-) {
+function openEditEvent(id) {
+  const event = allEventsMap.get(id);
+  if (!event) {
+    showAlert("Could not find event details to edit.", "danger");
+    return;
+  }
+
   currentEditEventId = id;
-  document.getElementById("event-title").value = title;
-  document.getElementById("event-date").value = new Date(date)
+  document.getElementById("event-title").value = event.title;
+  document.getElementById("event-date").value = new Date(event.date)
     .toISOString()
     .slice(0, 16);
-  document.getElementById("event-location").value = location;
-  document.getElementById("event-description").value = description;
-  document.getElementById("event-price").value = price;
-  document.getElementById("event-tickets").value = totalTickets;
+  document.getElementById("event-location").value = event.location;
+  document.getElementById("event-description").value = event.description;
+  document.getElementById("event-price").value = event.price;
+  document.getElementById("event-tickets").value = event.totalTickets;
 
   document.getElementById("editEventModal").classList.add("show");
 }
@@ -406,10 +408,16 @@ async function handleUpdateEvent(e) {
 }
 
 // Delete event
-async function deleteEvent(id, title) {
+async function deleteEvent(id) {
+  const event = allEventsMap.get(id);
+  if (!event) {
+    showAlert("Could not find event to delete.", "danger");
+    return;
+  }
+
   if (
     !confirm(
-      `Are you sure you want to delete "${title}"? This will also cancel all associated bookings.`,
+      `Are you sure you want to delete "${event.title}"? This will also cancel all associated bookings.`,
     )
   ) {
     return;
@@ -434,9 +442,16 @@ async function deleteEvent(id, title) {
 }
 
 // View event bookings
-async function viewEventBookings(eventId, eventTitle) {
+async function viewEventBookings(eventId) {
   const modal = document.getElementById("eventBookingsModal");
   const content = document.getElementById("event-bookings-content");
+
+  const event = allEventsMap.get(eventId);
+  if (!event) {
+    showAlert("Could not find event to view bookings.", "danger");
+    return;
+  }
+  const eventTitle = event.title;
 
   try {
     const response = await fetch(
@@ -470,7 +485,9 @@ async function viewEventBookings(eventId, eventTitle) {
           <td>${user.email}</td>
           <td>${booking.tickets}</td>
           <td>
-            <button class="btn btn-cancel" onclick="cancelBooking('${booking._id}', '${eventTitle}')">Cancel</button>
+            <button class="btn btn-cancel" onclick="cancelBooking('${
+              booking._id
+            }', '${eventTitle.replace(/'/g, "\\'")}')">Cancel</button>
           </td>
         </tr>
       `;
@@ -516,9 +533,17 @@ async function cancelBooking(bookingId, eventTitle) {
 }
 
 // Approve Organizer Request
-async function approveRequest(userId, username) {
+async function approveRequest(userId) {
+  const request = allRequestsMap.get(userId);
+  if (!request) {
+    showAlert("Could not find the request.", "danger");
+    return;
+  }
+
   if (
-    !confirm(`Are you sure you want to approve ${username} as an organizer?`)
+    !confirm(
+      `Are you sure you want to approve ${request.username} as an organizer?`,
+    )
   ) {
     return;
   }
@@ -545,8 +570,16 @@ async function approveRequest(userId, username) {
 }
 
 // Reject Organizer Request
-async function rejectRequest(userId, username) {
-  if (!confirm(`Are you sure you want to reject ${username}'s request?`)) {
+async function rejectRequest(userId) {
+  const request = allRequestsMap.get(userId);
+  if (!request) {
+    showAlert("Could not find the request.", "danger");
+    return;
+  }
+
+  if (
+    !confirm(`Are you sure you want to reject ${request.username}'s request?`)
+  ) {
     return;
   }
 

@@ -9,15 +9,17 @@
 </head>
 <body>
     <header>
-        <a href="index.html" class="logo">Eventify</a>
-        <nav>
-            <ul id="nav-links"><!-- Links will be injected by script --></ul>
-        </nav>
+        <div class="container">
+            <a href="index.html" class="logo">Eventify</a>
+            <nav>
+                <ul id="nav-links"><!-- Links will be injected by script --></ul>
+            </nav>
+        </div>
     </header>
 
-    <div class="container" style="max-width: 600px; margin: 40px auto; padding: 20px;">
+    <div class="container" style="max-width: 700px;">
         <h1>Create New Event</h1>
-        <form id="eventForm" enctype="multipart/form-data">
+        <form id="eventForm" enctype="multipart/form-data" class="card">
             <div class="form-group">
                 <label for="title">Event Title</label>
                 <input type="text" id="title" name="title" required>
@@ -54,18 +56,8 @@
                 <textarea id="description" name="description" rows="5" required></textarea>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width: 100%;">Create Event</button>
+            <button type="submit" class="btn btn-primary submit-btn">Create Event</button>
         </form>
-    </div>
-
-    <!-- Success Modal -->
-    <div id="successModal" class="success-modal">
-        <div class="success-modal-content">
-            <div style="font-size: 50px; margin-bottom: 10px;">✅</div>
-            <h3>Success!</h3>
-            <p>Event created successfully.</p>
-            <button id="modalOkBtn" class="btn-ok">Okay</button>
-        </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>

@@ -8,18 +8,20 @@
 </head>
 <body>
     <header>
-        <a href="index.html" class="logo">Eventify</a>
-        <nav>
-            <ul id="nav-links">
-                <!-- Links will be injected by script -->
-            </ul>
-        </nav>
+        <div class="container">
+            <a href="index.html" class="logo">Eventify</a>
+            <nav>
+                <ul id="nav-links">
+                    <!-- Links will be injected by script -->
+                </ul>
+            </nav>
+        </div>
     </header>
 
     <!-- Login Container -->
-    <div class="login-container">
-        <div class="login-form">
-            <div id="welcomeMessage" style="display:none; text-align: center; color: green; margin-bottom: 20px;"></div>
+    <div class="container">
+        <div class="form-wrapper">
+            <div id="welcomeMessage" style="display:none; text-align: center; color: #48bb78; margin-bottom: 20px;"></div>
             <h2>Welcome Back</h2>
             <form id="loginForm">
                 <div class="form-group">
@@ -34,6 +36,7 @@
                 <div class="form-footer">
                     <p>Don't have an account? <a href="register.html">Sign up</a></p>
                     <p><a href="forgot-password.html">Forgot password?</a></p>
+                    <p>Are you an admin? <a href="admin-login.html">Admin Login</a></p>
                 </div>
             </form>
         </div>

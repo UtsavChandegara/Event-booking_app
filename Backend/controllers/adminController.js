@@ -10,7 +10,12 @@ const adminController = {
       const totalBookings = await Booking.countDocuments();
       const totalUsers = await User.countDocuments({ role: "user" });
       const totalRevenue = await Booking.aggregate([
-        { $group: { _id: null, total: { $sum: "$totalPrice" } } },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: { $ifNull: ["$totalPrice", "$totalAmount"] } },
+          },
+        },
       ]);
 
       const activeUsers = await Booking.distinct("user");
@@ -51,7 +56,15 @@ const adminController = {
         },
         {
           $addFields: {
-            bookedTickets: { $sum: "$bookings.tickets" },
+            bookedTickets: {
+              $sum: {
+                $map: {
+                  input: "$bookings",
+                  as: "b",
+                  in: { $ifNull: ["$$b.tickets", "$$b.quantity"] },
+                },
+              },
+            },
             totalBookingsCount: { $size: "$bookings" },
             // Use $first to get the single creator object from the array
             createdBy: { $first: "$creatorInfo" },
@@ -157,9 +170,10 @@ const adminController = {
       // Find the event to update its bookedTickets count
       const event = await Event.findById(booking.event);
       if (event) {
+        const reservedTickets = booking.tickets || booking.quantity || 0;
         event.bookedTickets = Math.max(
           0,
-          (event.bookedTickets || 0) - booking.tickets,
+          (event.bookedTickets || 0) - reservedTickets,
         );
         await event.save();
       }
@@ -183,7 +197,7 @@ const adminController = {
         .populate("event", "title");
 
       const totalTickets = bookings.reduce(
-        (sum, booking) => sum + booking.tickets,
+        (sum, booking) => sum + (booking.tickets || booking.quantity || 0),
         0,
       );
 
@@ -206,7 +220,7 @@ const adminController = {
           $group: {
             _id: "$user",
             bookingCount: { $sum: 1 },
-            totalSpent: { $sum: "$totalPrice" },
+            totalSpent: { $sum: { $ifNull: ["$totalPrice", "$totalAmount"] } },
           },
         },
         {

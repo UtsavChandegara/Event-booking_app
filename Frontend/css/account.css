@@ -1,200 +1,58 @@
-/*
-====================================
-  Account Page Styles (Modernized)
-====================================
-*/
+@import url('variables.css');
 
 .account-container {
-    max-width: 1200px;
-    margin: var(--spacing-xl) auto;
-    padding: 0 var(--spacing-md);
+    max-width: 1000px;
+    margin: var(--space-5) auto;
+    padding-left: var(--space-3); /* 24px */
+    padding-right: var(--space-3); /* 24px */
 }
 
-.account-container h1 {
-    font-size: 2.5rem;
-    margin-bottom: var(--spacing-lg);
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: var(--spacing-md);
-}
-
-.account-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-sm);
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: var(--spacing-md);
-    margin-bottom: var(--spacing-lg);
-}
-
-.tab-btn, .btn-logout {
-    padding: var(--spacing-sm) var(--spacing-md);
-    text-align: center;
-    background: transparent;
-    border: none;
-    border-bottom: 3px solid transparent;
-    border-radius: 0;
-    cursor: pointer;
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-    transition: var(--transition-smooth);
-}
-
-.tab-btn:hover, .btn-logout:hover {
-    background-color: transparent;
-    color: var(--primary-color);
-}
-
-.tab-btn.active {
-    background-color: transparent;
-    color: var(--primary-color);
-    border-color: var(--primary-color);
+.account-container > h1 {
+    margin-bottom: var(--space-4);
 }
 
 .btn-logout {
     margin-left: auto;
-    color: var(--danger-text);
-    border-bottom: 3px solid transparent;
+    background: none;
+    border: 1px solid #ef4444; /* red-500 */
+    color: #ef4444;
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
 }
 
 .btn-logout:hover {
-    background-color: transparent;
-    border-bottom-color: var(--danger-bg);
+    background-color: #ef4444;
+    color: white;
 }
 
-/* --- Content Area --- */
-.account-content h2 {
-    font-size: 1.8rem;
-    margin-bottom: var(--spacing-md);
-}
-
-.tab-content {
-    display: none;
-}
-
-.tab-content.active {
-    display: block;
-    animation: fadeIn 0.5s;
-}
-
-/* --- General Card Styling --- */
-.card {
-    background: var(--bg-surface);
-    padding: var(--spacing-lg);
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-soft);
-    margin-bottom: var(--spacing-md);
-    border: 1px solid var(--border-color);
-}
-
-#profile-details-container p {
-    font-size: 1.1rem;
-    margin-bottom: var(--spacing-sm);
-    color: var(--text-secondary);
-}
-
-#profile-details-container p strong {
-    color: var(--text-primary);
-    min-width: 150px;
-    display: inline-block;
-}
-
-/* --- Bookings Section --- */
 .filter-bar {
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--space-4);
     display: flex;
-    gap: var(--spacing-sm);
+    gap: var(--space-2);
 }
 
 .filter-btn {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border: 1px solid var(--border-color);
-    background: transparent;
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid var(--bg-surface);
+    background: var(--bg-main);
     color: var(--text-secondary);
-    border-radius: var(--border-radius-pill);
+    border-radius: var(--radius-md);
     cursor: pointer;
-    transition: var(--transition-smooth);
 }
 
 .filter-btn.active, .filter-btn:hover {
-    background-color: var(--accent-color);
-    color: var(--bg-main);
-    border-color: var(--accent-color);
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
 }
 
-#bookings-container {
-    display: grid;
-    gap: var(--spacing-md);
-}
-
-.booking-card {
-    background: var(--bg-surface);
-    padding: var(--spacing-md);
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-soft);
-    border-left: 4px solid var(--primary-color);
-}
-
-.booking-card h4 {
-    font-size: 1.4rem;
-    margin-bottom: var(--spacing-sm);
-    color: var(--text-primary);
-    background: none;
-    -webkit-text-fill-color: var(--text-primary);
-}
-
-.booking-card p {
-    margin-bottom: var(--spacing-xs);
-    color: var(--text-secondary);
-}
-
-.booking-actions {
-    margin-top: var(--spacing-md);
-    display: flex;
-    gap: var(--spacing-sm);
-}
-
-/* --- My Created Events Section --- */
-#created-events-container {
-    /* This now uses the global .events-grid class, so specific styles are not needed */
-}
-
-/* --- Attendee Modal Table --- */
-#attendees-list-container table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: var(--spacing-md);
-}
-
-#attendees-list-container th, #attendees-list-container td {
-    text-align: left;
-    padding: var(--spacing-sm);
-    border-bottom: 1px solid var(--border-color);
-}
-
-#attendees-list-container th {
-    color: var(--text-secondary);
-}
-
-/* --- Settings Section --- */
 .danger-zone {
-    border-left: 4px solid var(--danger-text);
+    border-color: #ef4444 !important;
+    margin-top: var(--space-5);
 }
 
-/* 
-  --- Modals & Alerts --- 
-  These components are now styled globally in components.css.
-  The styles below are removed to avoid duplication.
-*/
-
-/* --- Responsive Design --- */
-@media (max-width: 768px) {
-    .account-tabs {
-        gap: var(--spacing-xs);
-    }
-
-    .tab-btn, .btn-logout {
-        padding: var(--spacing-sm);
-        font-size: 0.9rem;
-    }
+.danger-zone h3 {
+    color: #f87171; /* red-400 */
 }

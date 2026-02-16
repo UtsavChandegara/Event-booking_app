@@ -31,26 +31,35 @@ const userController = {
 
       // Check for uniqueness if username/email are being changed
       if (username && username !== user.username) {
-        if (await User.findOne({ username })) {
+        const usernameExists = await User.findOne({ username });
+        if (usernameExists) {
           return res.status(400).json({ message: "Username is already taken" });
         }
         user.username = username;
       }
       if (email && email !== user.email) {
-        if (await User.findOne({ email })) {
+        const emailExists = await User.findOne({ email });
+        if (emailExists) {
           return res.status(400).json({ message: "Email is already in use" });
         }
         user.email = email;
       }
 
-      // Update other fields (add them to your User model if they don't exist)
-      if (phone !== undefined) user.phone = phone;
-      if (city !== undefined) user.city = city;
+      // Update optional fields. Check if the property exists in the request body
+      // to allow setting them to empty strings.
+      if (req.body.hasOwnProperty("phone")) {
+        user.phone = phone;
+      }
+      if (req.body.hasOwnProperty("city")) {
+        user.city = city;
+      }
 
-      const updatedUser = await user.save();
-      updatedUser.password = undefined; // Don't send password back
+      const savedUser = await user.save();
+      // Convert to a plain object and remove password before sending
+      const userToReturn = savedUser.toObject();
+      delete userToReturn.password;
 
-      res.json({ message: "Profile updated successfully", user: updatedUser });
+      res.json({ message: "Profile updated successfully", user: userToReturn });
     } catch (error) {
       console.error("Error updating profile:", error);
       res.status(500).json({ message: "Server error" });
@@ -94,7 +103,7 @@ const userController = {
         .populate("event")
         .sort({ createdAt: -1 });
 
-      if (!status) {
+      if (!status || status === "all") {
         return res.json(bookings);
       }
 

@@ -5,51 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Select Seats - Eventify</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .seat-selection-container {
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 20px;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        .booking-summary {
-            margin-top: 30px;
-            padding-top: 30px;
-            border-top: 2px solid #f1f1f1;
-            text-align: center;
-        }
-        .booking-summary p {
-            font-size: 1.2rem;
-            margin-bottom: 15px;
-        }
-        .booking-summary span {
-            font-weight: bold;
-            color: #667eea;
-        }
-    </style>
 </head>
 <body>
     <header>
-        <a href="index.html" class="logo">Eventify</a>
-        <nav>
-            <ul id="nav-links">
-                <!-- Links will be injected by script -->
-            </ul>
-        </nav>
+        <div class="container">
+            <a href="index.html" class="logo">Eventify</a>
+            <nav>
+                <ul id="nav-links">
+                    <!-- Links will be injected by script -->
+                </ul>
+            </nav>
+        </div>
     </header>
 
-    <div class="seat-selection-container">
-        <h1 id="event-title-heading">Confirm Your Booking</h1>
-        <p id="event-subtitle" style="text-align: center; color: #666;">Loading event details...</p>
+    <main>
+        <div class="container">
+            <div class="content-box">
+                <h1 id="event-title-heading">Confirm Your Booking</h1>
+                <p id="event-subtitle">Loading event details...</p>
 
-        <div class="booking-summary">
-            <p>You are booking <span id="seat-count">0</span> ticket(s) for a total of <span id="total-price">₹0</span></p>
-            <button class="btn btn-primary" id="checkout-btn">Proceed to Payment</button>
+                <div class="booking-summary">
+                    <p>You are booking <span id="seat-count">0</span> ticket(s) for a total of <span id="total-price">₹0</span></p>
+                    <button class="btn btn-primary" id="checkout-btn">Proceed to Payment</button>
+                </div>
+            </div>
         </div>
-    </div>
+    </main>
 
     <script type="module" src="js/nav.js"></script>
     <script>
@@ -118,7 +99,7 @@
                     checkoutBtn.disabled = true;
                     checkoutBtn.textContent = 'Processing...';
 
-                    const response = await fetch(`${BASE_URL}/bookings/checkout-session`, {
+                    const response = await fetch(`${BASE_URL}/bookings`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -126,18 +107,17 @@
                         },
                         body: JSON.stringify({
                             eventId: eventId,
-                            seats: [], // No seat selection UI
-                            quantity: quantity
+                            tickets: quantity
                         })
                     });
 
-                    const session = await response.json();
+                    const result = await response.json();
 
-                    if (response.ok && session.url) {
-                        // Redirect to Stripe checkout page
-                        window.location.href = session.url;
+                    if (response.ok) {
+                        alert(result.message || 'Booking successful!');
+                        window.location.href = 'account.html';
                     } else {
-                        throw new Error(session.error || 'Could not initiate payment. Please try again.');
+                        throw new Error(result.message || result.error || 'Could not complete booking. Please try again.');
                     }
                 } catch (error) {
                     alert(error.message);

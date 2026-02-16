@@ -9,37 +9,43 @@
 </head>
 <body>
     <header>
-        <a href="index.html" class="logo">Eventify</a>
-        <nav>
-            <ul id="nav-links">
-                <!-- Links will be injected by script -->
-            </ul>
-        </nav>
+        <div class="container">
+            <a href="index.html" class="logo">Eventify</a>
+            <nav>
+                <ul id="nav-links">
+                    <!-- Links will be injected by script -->
+                </ul>
+            </nav>
+        </div>
     </header>
     <main>
         <section class="events-list">
-            <h1>My Bookings</h1>
-            <div id="booked-events-container" class="events-grid">
-                <!-- Booked events will be dynamically loaded here -->
+            <div class="container">
+                <h1>My Bookings</h1>
+                <div id="booked-events-container" class="events-grid">
+                    <!-- Booked events will be dynamically loaded here -->
+                </div>
             </div>
         </section>
         <section class="events-list" style="margin-top: 40px;">
-            <h1>My Created Events</h1>
-            <div id="created-events-container" class="events-grid">
-                <!-- Created events will be dynamically loaded here -->
+            <div class="container">
+                <h1>My Created Events</h1>
+                <div id="created-events-container" class="events-grid">
+                    <!-- Created events will be dynamically loaded here -->
+                </div>
             </div>
         </section>
-        <section id="organizer-section" class="container" style="display: none; max-width: 600px; margin: 40px auto; text-align: center; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <section id="organizer-section" class="container" style="display: none;">
             <!-- Organizer upgrade section will be injected here -->
         </section>
     </main>
 
     <!-- Attendee List Modal -->
-    <div id="attendeesModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center;">
-        <div style="background-color: #fefefe; margin: auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 600px; border-radius: 10px; position: relative;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">
+    <div id="attendeesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
                 <h2 id="attendees-modal-title">Event Attendees</h2>
-                <span class="close-btn" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+                <span class="close-btn">&times;</span>
             </div>
             <div id="attendees-list-container">
                 <!-- Attendee list will be rendered here -->

@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
       eventsGrid.innerHTML = events
         .map((event) => {
           const eventDate = new Date(event.date).toLocaleDateString();
-          const canDelete =
+          const canManage =
             user &&
             (user.role === "admin" ||
               (event.createdBy && user._id === event.createdBy._id));
@@ -54,8 +54,11 @@ document.addEventListener("DOMContentLoaded", () => {
                             }">Book Now</button>
                         </div>
                         ${
-                          canDelete
-                            ? `<button class="btn btn-danger delete-event-btn" data-event-id="${event._id}" style="margin-top: 10px; width: 100%;">Delete Event</button>`
+                          canManage
+                            ? `<div class="admin-actions" style="margin-top: 10px; display: flex; justify-content: flex-end; gap: 5px;">
+                                <a href="edit-event.html?id=${event._id}" class="btn">Edit</a>
+                                <button class="btn btn-danger delete-event-btn" data-event-id="${event._id}">Delete</button>
+                              </div>`
                             : ""
                         }
                     </div>
@@ -74,19 +77,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const target = e.target;
 
     if (target.classList.contains("book-btn")) {
+      const bookBtn = target;
+
       if (!token) {
         alert("Please log in to book an event.");
         window.location.href = "login.html";
         return;
       }
 
-      const eventId = target.dataset.eventId;
+      const eventId = bookBtn.dataset.eventId;
+
+      // Disable button to prevent multiple clicks and show loading state
+      bookBtn.disabled = true;
+      bookBtn.textContent = "Booking...";
 
       try {
         await api.createBooking({ eventId, tickets: 1 }, token);
-        alert("Event booked successfully!");
+        bookBtn.textContent = "Booked!";
+        bookBtn.classList.remove("btn-primary");
+        bookBtn.classList.add("btn-success"); // You may need to add a .btn-success style
+
+        // Redirect to account page after a short delay
+        setTimeout(() => (window.location.href = "account.html"), 1500);
       } catch (error) {
         console.error("Booking Error:", error);
+        bookBtn.disabled = false;
+        bookBtn.textContent = "Book Now";
         alert(error.message || "Booking failed. Please try again.");
       }
     }

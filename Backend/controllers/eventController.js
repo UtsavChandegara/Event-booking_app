@@ -13,14 +13,21 @@ exports.createEvent = async (req, res) => {
     }
 
     // Check if user is authorized to create an event
-    if (!user || (user.role !== "admin" && user.role !== "organizer")) {
-      return res.status(403).json({
-        message: "Access denied. Only admins or organizers can create events.",
-      });
+    if (!user || user.role !== "organizer") {
+      return res
+        .status(403)
+        .json({ message: "Access denied. Only organizers can create events." });
     }
 
-    const { title, date, location, description, price, totalTickets, imageUrl } =
-      req.body;
+    const {
+      title,
+      date,
+      location,
+      description,
+      price,
+      totalTickets,
+      imageUrl,
+    } = req.body;
 
     let finalImageUrl = imageUrl ? imageUrl.trim() : imageUrl;
 
@@ -111,8 +118,15 @@ exports.getEventById = async (req, res) => {
 
 exports.updateEvent = async (req, res) => {
   try {
-    const { title, date, location, description, price, totalTickets, imageUrl } =
-      req.body;
+    const {
+      title,
+      date,
+      location,
+      description,
+      price,
+      totalTickets,
+      imageUrl,
+    } = req.body;
     const event = await Event.findById(req.params.id);
 
     if (!event) {

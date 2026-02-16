@@ -5,21 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Login - Event Booking</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="css/admin.css">
-  <style>
-    /* Utility classes to manage dynamic states without inline styles */
-    .loading { display: none; }
-    .loading.is-active { display: block; }
-    .form-hint {
-      margin-top: 15px;
-      color: var(--text-muted);
-      font-size: 12px;
-    }
-  </style>
 </head>
 <body class="admin-login-body">
   <div class="container">
-    <div class="login-card slide-up">
+    <div class="login-card form-wrapper slide-up">
       <div class="logo">
         <h1>🎫 Event Booking</h1>
         <p>Admin Dashboard <span class="badge">ADMIN</span></p>
@@ -38,7 +27,7 @@
           <input type="password" id="password" placeholder="Enter your password" required>
         </div>
 
-        <div class="loading" id="loading">
+        <div class="loader" id="loading" style="display: none;">
           <div class="spinner"></div>
         </div>
 
@@ -53,7 +42,7 @@
       </div>
 
       <div class="toggle-form">
-        <p class="form-hint">
+        <p style="margin-top: 15px; color: var(--text-secondary); font-size: 12px;">
           Demo: Use any admin account credentials
         </p>
       </div>
@@ -82,7 +71,7 @@
       const loading = document.getElementById('loading');
       const btn = document.getElementById('login-btn');
 
-      loading.classList.add('is-active');
+      loading.style.display = 'block';
       btn.disabled = true;
 
       try {
@@ -116,7 +105,7 @@
       } catch (error) {
         showAlert(error.message, 'danger');
       } finally {
-        loading.classList.remove('is-active');
+        loading.style.display = 'none';
         btn.disabled = false;
       }
     });

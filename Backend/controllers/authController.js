@@ -40,7 +40,11 @@ const authController = {
         },
       );
 
-      res.status(201).json({ user, token });
+      // Convert to a plain object and remove password before sending
+      const userToReturn = user.toObject();
+      delete userToReturn.password;
+
+      res.status(201).json({ user: userToReturn, token });
     } catch (error) {
       if (error.code === 11000) {
         const field = Object.keys(error.keyValue)[0];
@@ -70,7 +74,11 @@ const authController = {
         },
       );
 
-      res.json({ user, token });
+      // Convert to a plain object and remove password before sending
+      const userToReturn = user.toObject();
+      delete userToReturn.password;
+
+      res.json({ user: userToReturn, token });
     } catch (error) {
       res.status(401).json({ error: error.message });
     }
@@ -169,7 +177,9 @@ const authController = {
       }
 
       if (user.role === "organizer") {
-        return res.status(400).json({ message: "You are already an organizer." });
+        return res
+          .status(400)
+          .json({ message: "You are already an organizer." });
       }
 
       if (user.role === "admin") {
@@ -178,8 +188,10 @@ const authController = {
           .json({ message: "Admins cannot change their role." });
       }
 
-      if (user.organizerRequestStatus === 'pending') {
-        return res.status(400).json({ message: "You already have a pending request." });
+      if (user.organizerRequestStatus === "pending") {
+        return res
+          .status(400)
+          .json({ message: "You already have a pending request." });
       }
 
       // Set the request status to 'pending' for admin review
@@ -187,12 +199,15 @@ const authController = {
       await user.save();
 
       res.json({
-        message: "Your request to become an organizer has been submitted for review.",
+        message:
+          "Your request to become an organizer has been submitted for review.",
         user,
       });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: "Server error while submitting request." });
+      res
+        .status(500)
+        .json({ message: "Server error while submitting request." });
     }
   },
 };

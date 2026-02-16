@@ -1,0 +1,13 @@
+/* This file can be used for more complex keyframe animations. */
+/* The simple hover transitions are handled in components.css for now. */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

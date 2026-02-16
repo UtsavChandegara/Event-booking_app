@@ -87,21 +87,26 @@ function showAlert(message, type = "success") {
   setTimeout(() => (container.innerHTML = ""), 5000);
 }
 
+function renderProfile(user) {
+  const container = document.getElementById("profile-details-container");
+  if (!container || !user) return;
+  container.innerHTML = `
+          <p><strong>Username:</strong> ${user.username}</p>
+          <p><strong>Email:</strong> ${user.email}</p>
+          <p><strong>Member Since:</strong> ${new Date(
+            user.createdAt,
+          ).toLocaleDateString()}</p>
+          <p><strong>Phone:</strong> ${user.phone || "Not provided"}</p>
+          <p><strong>City:</strong> ${user.city || "Not provided"}</p>
+      `;
+}
+
 async function loadProfile() {
   const token = localStorage.getItem("token");
-  const container = document.getElementById("profile-details-container");
   try {
     const user = await api.getUserProfile(token);
     currentUser = user; // Store user data globally for modals
-    container.innerHTML = `
-            <p><strong>Username:</strong> ${user.username}</p>
-            <p><strong>Email:</strong> ${user.email}</p>
-            <p><strong>Member Since:</strong> ${new Date(
-              user.createdAt,
-            ).toLocaleDateString()}</p>
-            <p><strong>Phone:</strong> ${user.phone || "Not provided"}</p>
-            <p><strong>City:</strong> ${user.city || "Not provided"}</p>
-        `;
+    renderProfile(user);
 
     // --- Integration Logic ---
     // Show 'My Events' tab and load them if user is an organizer/admin
@@ -115,6 +120,7 @@ async function loadProfile() {
       setupOrganizerRequestSection(user);
     }
   } catch (error) {
+    const container = document.getElementById("profile-details-container");
     container.innerHTML = `<p class="error">${error.message}</p>`;
   }
 }
@@ -237,9 +243,15 @@ async function handleDeleteCreatedEvent(eventId) {
   try {
     await api.deleteEvent(eventId, token);
     showAlert("Event deleted successfully.");
-    // Reload created events to reflect the change
-    if (currentUser) {
-      loadCreatedEvents(currentUser._id);
+    // Instead of reloading the whole list, just remove the card from the DOM
+    const eventCard = document.getElementById(`event-${eventId}`);
+    if (eventCard) {
+      eventCard.remove();
+    }
+    // If no events are left, show the empty message
+    const container = document.getElementById("created-events-container");
+    if (container && !container.querySelector(".event-card")) {
+      container.innerHTML = "<p>You have not created any events.</p>";
     }
   } catch (error) {
     showAlert(error.message, "error");
@@ -271,13 +283,25 @@ async function handleUpdateProfile(e) {
 
   try {
     const result = await api.updateUserProfile(profileData, token);
+    const updatedUser = result.user;
+
+    // 1. Update global state and localStorage
+    currentUser = updatedUser;
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+
+    // 2. Immediately re-render the profile on the page for instant feedback
+    renderProfile(updatedUser);
+
+    // 3. Show success message and close modal
     showAlert(result.message);
-    localStorage.setItem("user", JSON.stringify(result.user)); // Update user in local storage
-    loadProfile(); // Refresh profile display
     document.getElementById("edit-profile-modal").style.display = "none";
+
+    // 4. Reload the page to ensure full consistency (e.g., navbar) after a short delay
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
   } catch (error) {
     showAlert(error.message, "error");
-  } finally {
     btn.disabled = false;
     btn.textContent = "Save Changes";
   }

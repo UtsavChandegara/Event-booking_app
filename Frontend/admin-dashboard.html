@@ -5,20 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard - Event Booking</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="css/admin.css">
 </head>
 <body class="admin-page" style="display: none;">
-  <div class="header admin-header">
-    <h1>🎫 Admin Dashboard</h1>
-    <div class="header-info">
-      <div class="user-info">
-        👤 <span id="user-name">Admin</span>
+  <header class="admin-header">
+    <div class="container">
+      <h1>🎫 Admin Dashboard</h1>
+      <div class="header-info">
+        <div class="user-info">
+          👤 <span id="user-name">Admin</span>
+        </div>
+        <button class="logout-btn" onclick="logout()">Logout</button>
       </div>
-      <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
-  </div>
-
-  <div class="container">
+  </header>
+  <main class="container">
     <!-- Statistics -->
     <div id="alert-container"></div>
 
@@ -43,10 +43,10 @@
 
     <!-- Tabs -->
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('events')">📅 Events</button>
-      <button class="tab-btn" onclick="switchTab('bookings')">🎫 Bookings</button>
-      <button class="tab-btn" onclick="switchTab('users')">👥 Active Users</button>
-      <button class="tab-btn" onclick="switchTab('requests')">
+      <button class="tab-btn active" onclick="switchTab('events', this)">📅 Events</button>
+      <button class="tab-btn" onclick="switchTab('bookings', this)">🎫 Bookings</button>
+      <button class="tab-btn" onclick="switchTab('users', this)">👥 Active Users</button>
+      <button class="tab-btn" onclick="switchTab('requests', this)">
          Organizer Requests 
         <span id="requests-count-badge" class="badge" hidden></span>
       </button>
@@ -54,14 +54,14 @@
 
     <!-- Events Tab -->
     <div id="events" class="tab-content active">
-      <div class="section">
+      <div class="admin-section">
         <h2>Upcoming Events</h2>
         <div id="upcoming-events-container" class="loading">
           <div class="spinner"></div>
           <p>Loading upcoming events...</p>
         </div>
       </div>
-      <div class="section">
+      <div class="admin-section">
         <h2>Past Events</h2>
         <div id="past-events-container" class="loading">
           <div class="spinner"></div>
@@ -72,7 +72,7 @@
 
     <!-- Bookings Tab -->
     <div id="bookings" class="tab-content">
-      <div class="section">
+      <div class="admin-section">
         <h2>Manage Bookings</h2>
         <div id="bookings-container" class="loading">
           <div class="spinner"></div>
@@ -83,7 +83,7 @@
 
     <!-- Users Tab -->
     <div id="users" class="tab-content">
-      <div class="section">
+      <div class="admin-section">
         <h2>Active Users</h2>
         <div id="users-container" class="loading">
           <div class="spinner"></div>
@@ -94,7 +94,7 @@
 
     <!-- Organizer Requests Tab -->
     <div id="requests" class="tab-content">
-      <div class="section">
+      <div class="admin-section">
         <h2>Pending Organizer Requests</h2>
         <div id="requests-container" class="loading">
           <div class="spinner"></div>
@@ -102,7 +102,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </main>
 
   <!-- Edit Event Modal -->
   <div id="editEventModal" class="modal">
@@ -146,7 +146,7 @@
 
   <!-- Event Bookings Modal -->
   <div id="eventBookingsModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width: 700px;">
       <div class="modal-header">
         <h2>Event Bookings</h2>
         <button class="close-btn" onclick="closeModal('eventBookingsModal')">&times;</button>
@@ -163,3 +163,4 @@
   <script src="js/admin-dashboard.js"></script>
 </body>
 </html>
+

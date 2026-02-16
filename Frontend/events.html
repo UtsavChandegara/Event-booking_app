@@ -9,24 +9,28 @@
 <body>
 
     <header>
-        <a href="index.html" class="logo">Eventify</a>
-        <nav>
-            <ul id="nav-links">
-                <!-- Links will be injected by script -->
-            </ul>
-        </nav>
+        <div class="container">
+            <a href="index.html" class="logo">Eventify</a>
+            <nav>
+                <ul id="nav-links">
+                    <!-- Links will be injected by script -->
+                </ul>
+            </nav>
+        </div>
     </header>
 
     <main>
         <section class="events-list">
-            <h1>Upcoming Events</h1>
-            <div id="upcoming-events-grid" class="events-grid">
-                <!-- Upcoming Events will be loaded here -->
-            </div>
+            <div class="container">
+                <h1>Upcoming Events</h1>
+                <div id="upcoming-events-grid" class="events-grid">
+                    <!-- Upcoming Events will be loaded here -->
+                </div>
 
-            <h1>Past Events</h1>
-            <div id="past-events-grid" class="events-grid">
-                <!-- Past Events will be loaded here -->
+                <h1>Past Events</h1>
+                <div id="past-events-grid" class="events-grid">
+                    <!-- Past Events will be loaded here -->
+                </div>
             </div>
         </section>
     </main>
@@ -87,12 +91,14 @@
 
                 return `
                     <div class="event-card">
-                        <img src="${imageUrl}" alt="${event.title}" class="event-card-image" onerror="this.onerror=null;this.src='${PLACEHOLDER_300x200}';">
+                        <div class="event-card-image-wrapper">
+                            <img src="${imageUrl}" alt="${event.title}" class="event-card-image" onerror="this.onerror=null;this.src='${PLACEHOLDER_300x200}';">
+                        </div>
                         <div class="event-card-content">
                             <h3>${event.title}</h3>
                             <p><i class="fas fa-calendar"></i> ${date} at ${time}</p>
                             <p><i class="fas fa-map-marker-alt"></i> ${event.location}</p>
-                            <p>₹${event.price}</p>
+                            <p><strong>₹${event.price}</strong></p>
                             <div class="event-card-footer">
                                 ${actionButton}
                             </div>
