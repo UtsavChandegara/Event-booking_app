@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:3000/api";
+const API_URL = `${window.location.protocol}//${window.location.hostname}:3000/api`;
 
 const api = {
   // Auth endpoints
@@ -220,6 +220,65 @@ const api = {
       throw new Error("Failed to cancel booking");
     }
     return response.ok;
+  },
+
+  getMyTickets: async (token, bookingId = "") => {
+    const query = bookingId ? `?bookingId=${bookingId}` : "";
+    const response = await fetch(`${API_URL}/tickets/my${query}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to fetch tickets");
+    }
+    return response.json();
+  },
+
+  getDynamicQr: async (ticketId, token) => {
+    const response = await fetch(`${API_URL}/tickets/${ticketId}/qr`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to generate QR");
+    }
+    return data;
+  },
+
+  verifyTicketScan: async (payload, token) => {
+    const response = await fetch(`${API_URL}/tickets/scan/verify`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to verify ticket");
+    }
+    return data;
+  },
+
+  getEntryRecords: async (eventId, token) => {
+    const response = await fetch(
+      `${API_URL}/tickets/entry-records?eventId=${encodeURIComponent(eventId)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to fetch entry records");
+    }
+    return data;
   },
 };
 

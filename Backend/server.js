@@ -10,10 +10,10 @@ const connectDB = async (retries = 5) => {
   for (let i = 0; i < retries; i++) {
     try {
       await mongoose.connect("mongodb://127.0.0.1:27017/eventify");
-      console.log("✅ MongoDB connected successfully");
+      console.log("âœ… MongoDB connected successfully");
       return;
     } catch (error) {
-      console.error(`❌ Connection attempt ${i + 1} failed:`, error.message);
+      console.error(`âŒ Connection attempt ${i + 1} failed:`, error.message);
       if (i === retries - 1) throw error;
       await new Promise((resolve) => setTimeout(resolve, 5000));
     }
@@ -22,7 +22,7 @@ const connectDB = async (retries = 5) => {
 
 // Initialize database connection
 connectDB().catch((err) => {
-  console.error("❌ Could not connect to MongoDB:", err);
+  console.error("âŒ Could not connect to MongoDB:", err);
   process.exit(1);
 });
 
@@ -30,9 +30,17 @@ connectDB().catch((err) => {
 // mongoose.set("debug", true);
 
 // Middleware setup
+const allowedOriginPattern =
+  /^http:\/\/(localhost|127\.0\.0\.1|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})(:\d+)?$/;
+
 app.use(
   cors({
-    origin: ["http://127.0.0.1:5500", "http://127.0.0.1:5501"],
+    origin: (origin, callback) => {
+      if (!origin || allowedOriginPattern.test(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
     methods: ["GET", "POST", "DELETE", "PUT"],
     credentials: true,
   }),
@@ -60,6 +68,14 @@ app.use("/api/users", userRoutes);
 const bookingRoutes = require("./routes/bookingRoutes");
 app.use("/api/bookings", bookingRoutes);
 
+// Dummy Payment Routes
+const paymentRoutes = require("./routes/paymentRoutes");
+app.use("/api/payments", paymentRoutes);
+
+// Ticket Routes
+const ticketRoutes = require("./routes/ticketRoutes");
+app.use("/api/tickets", ticketRoutes);
+
 // Admin Routes
 const adminRoutes = require("./routes/adminRoutes");
 app.use("/api/admin", adminRoutes);
@@ -67,7 +83,7 @@ app.use("/api/admin", adminRoutes);
 // Enhanced error handling middleware
 app.use((err, req, res, next) => {
   const multer = require("multer"); // Locally require for error checking
-  console.error("❌ Error:", err.message);
+  console.error("âŒ Error:", err.message);
   if (err instanceof multer.MulterError) {
     if (err.code === "LIMIT_FILE_SIZE") {
       return res
@@ -85,10 +101,10 @@ app.use((err, req, res, next) => {
 const gracefulShutdown = async () => {
   try {
     await mongoose.connection.close();
-    console.log("✅ MongoDB connection closed");
+    console.log("âœ… MongoDB connection closed");
     process.exit(0);
   } catch (err) {
-    console.error("❌ Error during shutdown:", err);
+    console.error("âŒ Error during shutdown:", err);
     process.exit(1);
   }
 };
@@ -97,6 +113,6 @@ process.on("SIGTERM", gracefulShutdown);
 process.on("SIGINT", gracefulShutdown);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`ðŸš€ Server running on port ${PORT}`);
 });

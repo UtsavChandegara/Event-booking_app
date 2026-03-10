@@ -1,6 +1,8 @@
 const Booking = require("../models/Booking");
 const Event = require("../models/Event");
 const User = require("../models/User");
+const Ticket = require("../models/Ticket");
+const { issueTicketsForBooking } = require("../services/ticketService");
 
 const bookingController = {
   // Simplified booking creation without payment integration
@@ -38,6 +40,12 @@ const bookingController = {
       });
 
       await newBooking.save();
+      await issueTicketsForBooking({
+        bookingId: newBooking._id,
+        eventId,
+        userId,
+        count: tickets,
+      });
 
       // Update event's booked tickets count
       await Event.updateOne(
@@ -90,6 +98,10 @@ const bookingController = {
           { $inc: { bookedTickets: -reservedTickets } },
         );
       }
+      await Ticket.updateMany(
+        { booking: booking._id, status: "ACTIVE" },
+        { $set: { status: "CANCELLED" } },
+      );
 
       // Note: This does not issue a refund via Stripe. It only deletes the booking record.
       await booking.deleteOne();

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Scanner - Eventify</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <style>
+        #qr-reader {
+            width: 100%;
+            max-width: 420px;
+            margin: 12px auto;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 8px;
+            background: #fff;
+        }
+        .scanner-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        #scan-result {
+            font-weight: 600;
+        }
+        .last-scan {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #f7f7f7;
+        }
+        .scan-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .scan-modal-card {
+            width: min(520px, 92vw);
+            background: #fff;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        }
+        .scan-success-title {
+            color: #1e7e34;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        .entry-allowed {
+            font-weight: 700;
+            color: #1e7e34;
+        }
+        .records-box {
+            margin-top: 16px;
+            border-top: 1px solid #eee;
+            padding-top: 12px;
+        }
+        .records-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
+        .records-table th,
+        .records-table td {
+            border-bottom: 1px solid #eee;
+            padding: 8px;
+            text-align: left;
+            font-size: 0.92rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo">Eventify</a>
+            <nav>
+                <ul id="nav-links"></ul>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <section class="container" style="max-width: 760px; margin-top: 24px;">
+            <h1>Gate Ticket Verification</h1>
+            <p>For organizer/admin use. Scan attendee QR and mark ticket as USED.</p>
+            <div class="content-box">
+                <div class="form-group">
+                    <label for="gate-location">Gate Location</label>
+                    <input id="gate-location" type="text" placeholder="Gate A">
+                </div>
+                <div class="scanner-actions">
+                    <button id="start-scan-btn" class="btn btn-primary">Start Camera Scan</button>
+                    <button id="stop-scan-btn" class="btn btn-secondary" disabled>Stop Scan</button>
+                </div>
+                <div id="qr-reader"></div>
+                <div class="form-group">
+                    <label for="manual-token">Manual QR Token (fallback)</label>
+                    <textarea id="manual-token" rows="4" style="width: 100%;"></textarea>
+                </div>
+                <button id="verify-btn" class="btn">Verify Manual Token</button>
+                <p id="scan-result" style="margin-top: 12px;"></p>
+                <div id="last-scan" class="last-scan" style="display: none;"></div>
+                <div class="records-box">
+                    <h3 style="margin-bottom: 8px;">Entry Records</h3>
+                    <p id="entry-summary">No event scanned yet.</p>
+                    <div id="entry-records-table"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="scan-success-modal" class="scan-modal" aria-hidden="true">
+        <div class="scan-modal-card">
+            <h2 class="scan-success-title">Verification Successful</h2>
+            <p class="entry-allowed">You are verified and allowed to enter.</p>
+            <div id="scan-success-details"></div>
+            <div style="margin-top: 14px;">
+                <button id="close-success-modal-btn" class="btn btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/nav.js"></script>
+    <script type="module">
+        import api from "./js/api.js";
+
+        const token = localStorage.getItem("token");
+        const user = JSON.parse(localStorage.getItem("user") || "null");
+        const manualTokenInput = document.getElementById("manual-token");
+        const gateInput = document.getElementById("gate-location");
+        const startScanBtn = document.getElementById("start-scan-btn");
+        const stopScanBtn = document.getElementById("stop-scan-btn");
+        const verifyBtn = document.getElementById("verify-btn");
+        const resultEl = document.getElementById("scan-result");
+        const lastScanEl = document.getElementById("last-scan");
+        const successModal = document.getElementById("scan-success-modal");
+        const successDetails = document.getElementById("scan-success-details");
+        const closeSuccessModalBtn = document.getElementById("close-success-modal-btn");
+        const entrySummaryEl = document.getElementById("entry-summary");
+        const entryRecordsTableEl = document.getElementById("entry-records-table");
+
+        let scanner = null;
+        let isVerifying = false;
+
+        if (!token || !user) {
+            window.location.href = "login.html";
+        }
+
+        if (user.role !== "organizer" && user.role !== "admin") {
+            resultEl.textContent = "Access denied. Only organizer/admin can scan.";
+            resultEl.style.color = "#d9534f";
+            startScanBtn.disabled = true;
+            verifyBtn.disabled = true;
+        }
+
+        function showSuccessPopup(ticket) {
+            successDetails.innerHTML = `
+                <div><strong>Ticket:</strong> ${ticket.ticketNumber}</div>
+                <div><strong>Attendee:</strong> ${ticket.user?.username || "Unknown"}</div>
+                <div><strong>Event:</strong> ${ticket.event?.title || "-"}</div>
+                <div><strong>Gate:</strong> ${ticket.gateLocation}</div>
+                <div><strong>Time:</strong> ${new Date(ticket.usedAt).toLocaleString()}</div>
+            `;
+            successModal.style.display = "flex";
+            successModal.setAttribute("aria-hidden", "false");
+        }
+
+        function closeSuccessPopup() {
+            successModal.style.display = "none";
+            successModal.setAttribute("aria-hidden", "true");
+        }
+
+        function renderEntryRecords(data) {
+            entrySummaryEl.textContent =
+                `Total entries: ${data.summary.totalEntries} | Unique attendees: ${data.summary.uniqueAttendees}`;
+
+            if (!data.records.length) {
+                entryRecordsTableEl.innerHTML = "<p>No entries yet.</p>";
+                return;
+            }
+
+            entryRecordsTableEl.innerHTML = `
+                <table class="records-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Attendee</th>
+                            <th>Ticket</th>
+                            <th>Booked Qty</th>
+                            <th>Gate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.records
+                            .map((row) => `
+                                <tr>
+                                    <td>${new Date(row.scannedAt).toLocaleTimeString()}</td>
+                                    <td>${row.attendee?.username || "Unknown"}</td>
+                                    <td>${row.ticketNumber || "-"}</td>
+                                    <td>${row.bookedTickets || 0}</td>
+                                    <td>${row.gateLocation}</td>
+                                </tr>
+                            `)
+                            .join("")}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        async function verifyToken(qrToken) {
+            if (isVerifying) return;
+            const gateLocation = gateInput.value.trim();
+            if (!qrToken || !gateLocation) {
+                resultEl.textContent = "QR token and gate location are required.";
+                resultEl.style.color = "#d9534f";
+                return;
+            }
+
+            try {
+                isVerifying = true;
+                verifyBtn.disabled = true;
+                startScanBtn.disabled = true;
+                verifyBtn.textContent = "Verifying...";
+                const data = await api.verifyTicketScan({ qrToken, gateLocation }, token);
+                resultEl.textContent = `${data.message} Ticket ${data.ticket.ticketNumber} used at ${new Date(data.ticket.usedAt).toLocaleTimeString()}.`;
+                resultEl.style.color = "#28a745";
+                lastScanEl.style.display = "block";
+                lastScanEl.innerHTML = `
+                    <div><strong>Ticket:</strong> ${data.ticket.ticketNumber}</div>
+                    <div><strong>Attendee:</strong> ${data.ticket.user?.username || "Unknown"}</div>
+                    <div><strong>Event:</strong> ${data.ticket.event?.title || "-"}</div>
+                    <div><strong>Gate:</strong> ${data.ticket.gateLocation}</div>
+                `;
+                showSuccessPopup(data.ticket);
+                if (data.ticket?.event?._id) {
+                    const recordsData = await api.getEntryRecords(data.ticket.event._id, token);
+                    renderEntryRecords(recordsData);
+                }
+                await stopScanner();
+            } catch (error) {
+                resultEl.textContent = error.message;
+                resultEl.style.color = "#d9534f";
+            } finally {
+                isVerifying = false;
+                verifyBtn.disabled = false;
+                startScanBtn.disabled = false;
+                verifyBtn.textContent = "Verify Entry";
+            }
+        }
+
+        async function startScanner() {
+            if (scanner) return;
+            const gateLocation = gateInput.value.trim();
+            if (!gateLocation) {
+                resultEl.textContent = "Enter gate location before scanning.";
+                resultEl.style.color = "#d9534f";
+                return;
+            }
+
+            scanner = new Html5Qrcode("qr-reader");
+            try {
+                await scanner.start(
+                    { facingMode: "environment" },
+                    { fps: 10, qrbox: { width: 240, height: 240 } },
+                    async (decodedText) => {
+                        await verifyToken(decodedText);
+                    },
+                    () => {}
+                );
+                startScanBtn.disabled = true;
+                stopScanBtn.disabled = false;
+                resultEl.textContent = "Scanner running. Point camera at attendee QR.";
+                resultEl.style.color = "#444";
+            } catch (error) {
+                resultEl.textContent = `Unable to start camera scanner: ${error}`;
+                resultEl.style.color = "#d9534f";
+                scanner = null;
+            }
+        }
+
+        async function stopScanner() {
+            if (!scanner) return;
+            try {
+                await scanner.stop();
+                await scanner.clear();
+            } catch (error) {
+                console.error("Scanner stop error:", error);
+            } finally {
+                scanner = null;
+                startScanBtn.disabled = false;
+                stopScanBtn.disabled = true;
+            }
+        }
+
+        startScanBtn.addEventListener("click", startScanner);
+        stopScanBtn.addEventListener("click", stopScanner);
+
+        verifyBtn.addEventListener("click", async () => {
+            const qrToken = manualTokenInput.value.trim();
+            await verifyToken(qrToken);
+        });
+
+        closeSuccessModalBtn.addEventListener("click", closeSuccessPopup);
+        successModal.addEventListener("click", (e) => {
+            if (e.target === successModal) {
+                closeSuccessPopup();
+            }
+        });
+
+        window.addEventListener("beforeunload", stopScanner);
+    </script>
+</body>
+</html>

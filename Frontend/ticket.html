@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Secure Tickets - Eventify</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        .tickets-wrap {
+            display: grid;
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .ticket-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            background: #fff;
+            padding: 16px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+        }
+        .ticket-meta {
+            display: grid;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .qr-box {
+            width: 260px;
+            height: 260px;
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .ticket-status {
+            margin-top: 10px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo">Eventify</a>
+            <nav>
+                <ul id="nav-links"></ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="events-list">
+            <div class="container">
+                <h1>My Secure Tickets</h1>
+                <p>Each ticket has one QR code. It can be used only once at entry.</p>
+                <div id="tickets-container" class="tickets-wrap">
+                    <p>Loading tickets...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="js/nav.js"></script>
+    <script type="module">
+        import api from "./js/api.js";
+
+        const token = localStorage.getItem("token");
+        const user = JSON.parse(localStorage.getItem("user") || "null");
+
+        if (!token || !user) {
+            window.location.href = "login.html";
+        }
+
+        const ticketsContainer = document.getElementById("tickets-container");
+        const bookingId = new URLSearchParams(window.location.search).get("bookingId");
+
+        const buildTicketCard = (ticket) => {
+            return `
+                <div class="ticket-card" id="ticket-${ticket._id}">
+                    <div class="ticket-meta">
+                        <div><strong>Ticket:</strong> ${ticket.ticketNumber}</div>
+                        <div><strong>Event:</strong> ${ticket.event?.title || "Event"}</div>
+                        <div><strong>Date:</strong> ${ticket.event?.date ? new Date(ticket.event.date).toLocaleString() : "-"}</div>
+                        <div><strong>Location:</strong> ${ticket.event?.location || "-"}</div>
+                    </div>
+                    <div class="qr-box" id="qr-${ticket._id}"></div>
+                    <div class="ticket-status" id="status-${ticket._id}">Status: ${ticket.status}</div>
+                </div>
+            `;
+        };
+
+        const renderQr = (containerId, tokenValue) => {
+            const box = document.getElementById(containerId);
+            if (!box) return;
+            box.innerHTML = "";
+            new QRCode(box, {
+                text: tokenValue,
+                width: 240,
+                height: 240,
+                correctLevel: QRCode.CorrectLevel.M,
+            });
+        };
+
+        const loadTicketQr = async (ticketId) => {
+            try {
+                const data = await api.getDynamicQr(ticketId, token);
+                renderQr(`qr-${ticketId}`, data.qrToken);
+
+                const statusEl = document.getElementById(`status-${ticketId}`);
+                if (statusEl) statusEl.textContent = `Status: ${data.status}`;
+            } catch (error) {
+                const statusEl = document.getElementById(`status-${ticketId}`);
+                if (statusEl) statusEl.textContent = `Status: ${error.message}`;
+            }
+        };
+
+        const init = async () => {
+            try {
+                const tickets = await api.getMyTickets(token, bookingId || "");
+
+                if (!tickets.length) {
+                    ticketsContainer.innerHTML = "<p>No tickets found for this booking.</p>";
+                    return;
+                }
+
+                ticketsContainer.innerHTML = tickets.map(buildTicketCard).join("");
+
+                tickets.forEach((ticket) => {
+                    if (ticket.status === "ACTIVE") {
+                        loadTicketQr(ticket._id);
+                    } else {
+                        const statusEl = document.getElementById(`status-${ticket._id}`);
+                        if (statusEl) statusEl.textContent = `Status: ${ticket.status}`;
+                    }
+                });
+            } catch (error) {
+                ticketsContainer.innerHTML = `<p>${error.message}</p>`;
+            }
+        };
+
+        init();
+    </script>
+</body>
+</html>

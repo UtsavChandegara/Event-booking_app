@@ -1,4 +1,4 @@
-const BASE_URL = "http://127.0.0.1:3000/api";
+const BASE_URL = `${window.location.protocol}//${window.location.hostname}:3000/api`;
 let currentEditEventId = null;
 let allEventsMap = new Map();
 let allRequestsMap = new Map();

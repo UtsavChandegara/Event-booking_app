@@ -269,7 +269,7 @@
             const formData = new FormData(e.target);
 
             try {
-                const response = await fetch('http://127.0.0.1:3000/api/events', {
+                const response = await fetch(`${window.location.protocol}//${window.location.hostname}:3000/api/events`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`
