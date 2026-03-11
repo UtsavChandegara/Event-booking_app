@@ -27,8 +27,6 @@
       <!-- Horizontal Tab Bar -->
       <div class="account-tabs">
         <button class="tab-btn active" onclick="switchTab('profile')">Profile</button>
-        <button class="tab-btn" onclick="switchTab('bookings')">My Bookings</button>
-        <button class="tab-btn" id="my-events-tab-btn" style="display: none" onclick="switchTab('my-events')">My Events</button>
         <button class="tab-btn" onclick="switchTab('settings')">Settings</button>
         <button class="btn-logout" onclick="logout()">Logout</button>
       </div>
@@ -42,27 +40,6 @@
             <p>Loading profile...</p>
           </div>
           <button class="btn" id="edit-profile-btn">Edit Profile</button>
-        </div>
-
-        <!-- Bookings Tab -->
-        <div id="bookings" class="tab-content">
-          <h2>My Bookings</h2>
-          <div class="filter-bar">
-            <button class="filter-btn active" data-status="all">All</button>
-            <button class="filter-btn" data-status="upcoming">Upcoming</button>
-            <button class="filter-btn" data-status="past">Past</button>
-          </div>
-          <div id="bookings-container">
-            <p>Loading bookings...</p>
-          </div>
-        </div>
-
-        <!-- My Created Events Tab -->
-        <div id="my-events" class="tab-content">
-          <h2>My Created Events</h2>
-          <div id="created-events-container">
-            <p>Loading your created events...</p>
-          </div>
         </div>
 
         <!-- Settings Tab -->
@@ -128,29 +105,6 @@
           </div>
           <button type="submit" class="btn">Save Changes</button>
         </form>
-      </div>
-    </div>
-
-    <!-- E-Ticket Modal -->
-    <div id="eticket-modal" class="modal">
-      <div class="modal-content" style="max-width: 800px;">
-        <span class="close-btn">&times;</span>
-        <h2>E-Ticket</h2>
-        <div id="eticket-content">
-          <!-- E-ticket details will be rendered here -->
-        </div>
-        <button class="btn" onclick="window.print()">Print Ticket</button>
-      </div>
-    </div>
-
-    <!-- Attendees Modal -->
-    <div id="attendeesModal" class="modal">
-      <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h2 id="attendees-modal-title">Event Attendees</h2>
-        <div id="attendees-list-container">
-          <!-- Attendee list will be rendered here -->
-        </div>
       </div>
     </div>
 

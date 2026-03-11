@@ -39,6 +39,28 @@
             margin-top: 10px;
             font-weight: 600;
         }
+        .ticket-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        .entry-confirmation-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .entry-confirmation-card {
+            width: min(460px, 92vw);
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -63,6 +85,18 @@
         </section>
     </main>
 
+    <div id="entry-confirmation-modal" class="entry-confirmation-modal" aria-hidden="true">
+        <div class="entry-confirmation-card">
+            <h2 style="margin-top: 0;">Entry Confirmed</h2>
+            <p>Your ticket was verified successfully.</p>
+            <div id="entry-confirmation-details" style="margin: 12px 0;"></div>
+            <div class="ticket-actions">
+                <a id="entry-card-link" class="btn btn-secondary" href="experience-cards.html?view=unlocked">Open Experience Card</a>
+                <button id="entry-confirmation-close" class="btn btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="js/nav.js"></script>
     <script type="module">
         import api from "./js/api.js";
@@ -76,8 +110,21 @@
 
         const ticketsContainer = document.getElementById("tickets-container");
         const bookingId = new URLSearchParams(window.location.search).get("bookingId");
+        const entryConfirmationModal = document.getElementById("entry-confirmation-modal");
+        const entryConfirmationDetails = document.getElementById("entry-confirmation-details");
+        const entryCardLink = document.getElementById("entry-card-link");
+        const entryConfirmationClose = document.getElementById("entry-confirmation-close");
+        const statusByTicketId = new Map();
+        let ticketsPollInterval = null;
+        let hasShownEntryConfirmation = false;
 
         const buildTicketCard = (ticket) => {
+            const actionHtml = ticket.status === "USED"
+                ? `<div class="ticket-actions">
+                        <a class="btn btn-secondary" href="experience-cards.html?bookingId=${encodeURIComponent(ticket.booking?._id || bookingId || "")}&view=unlocked">Open Experience Card</a>
+                   </div>`
+                : "";
+
             return `
                 <div class="ticket-card" id="ticket-${ticket._id}">
                     <div class="ticket-meta">
@@ -88,8 +135,31 @@
                     </div>
                     <div class="qr-box" id="qr-${ticket._id}"></div>
                     <div class="ticket-status" id="status-${ticket._id}">Status: ${ticket.status}</div>
+                    ${actionHtml}
                 </div>
             `;
+        };
+
+        const showEntryConfirmationPopup = (ticket) => {
+            if (hasShownEntryConfirmation || ticket.status !== "USED") return;
+
+            const targetBookingId = ticket.booking?._id || bookingId || "";
+            entryConfirmationDetails.innerHTML = `
+                <div><strong>Ticket:</strong> ${ticket.ticketNumber}</div>
+                <div><strong>Event:</strong> ${ticket.event?.title || "Event"}</div>
+                <div><strong>Status:</strong> Verified at entry</div>
+            `;
+            entryCardLink.href = targetBookingId
+                ? `experience-cards.html?bookingId=${encodeURIComponent(targetBookingId)}&view=unlocked`
+                : "experience-cards.html?view=unlocked";
+            entryConfirmationModal.style.display = "flex";
+            entryConfirmationModal.setAttribute("aria-hidden", "false");
+            hasShownEntryConfirmation = true;
+        };
+
+        const closeEntryConfirmationPopup = () => {
+            entryConfirmationModal.style.display = "none";
+            entryConfirmationModal.setAttribute("aria-hidden", "true");
         };
 
         const renderQr = (containerId, tokenValue) => {
@@ -117,29 +187,99 @@
             }
         };
 
-        const init = async () => {
-            try {
-                const tickets = await api.getMyTickets(token, bookingId || "");
+        const updateTicketCard = (ticket) => {
+            const ticketCard = document.getElementById(`ticket-${ticket._id}`);
+            if (!ticketCard) return;
 
-                if (!tickets.length) {
-                    ticketsContainer.innerHTML = "<p>No tickets found for this booking.</p>";
-                    return;
+            const statusEl = document.getElementById(`status-${ticket._id}`);
+            if (statusEl) {
+                statusEl.textContent = `Status: ${ticket.status}`;
+            }
+
+            let actionWrap = ticketCard.querySelector(".ticket-actions");
+            if (ticket.status === "USED") {
+                const targetBookingId = ticket.booking?._id || bookingId || "";
+                const cardHref = targetBookingId
+                    ? `experience-cards.html?bookingId=${encodeURIComponent(targetBookingId)}&view=unlocked`
+                    : "experience-cards.html?view=unlocked";
+
+                if (!actionWrap) {
+                    actionWrap = document.createElement("div");
+                    actionWrap.className = "ticket-actions";
+                    ticketCard.appendChild(actionWrap);
                 }
 
-                ticketsContainer.innerHTML = tickets.map(buildTicketCard).join("");
+                actionWrap.innerHTML = `<a class="btn btn-secondary" href="${cardHref}">Open Experience Card</a>`;
+            } else if (actionWrap) {
+                actionWrap.remove();
+            }
+        };
 
-                tickets.forEach((ticket) => {
-                    if (ticket.status === "ACTIVE") {
-                        loadTicketQr(ticket._id);
-                    } else {
-                        const statusEl = document.getElementById(`status-${ticket._id}`);
-                        if (statusEl) statusEl.textContent = `Status: ${ticket.status}`;
+        const syncTicketsState = (tickets) => {
+            tickets.forEach((ticket) => {
+                const previousStatus = statusByTicketId.get(ticket._id);
+                statusByTicketId.set(ticket._id, ticket.status);
+
+                updateTicketCard(ticket);
+
+                if (ticket.status === "ACTIVE") {
+                    loadTicketQr(ticket._id);
+                } else {
+                    const qrBox = document.getElementById(`qr-${ticket._id}`);
+                    if (qrBox) qrBox.innerHTML = "";
+                }
+
+                if (ticket.status === "USED" && previousStatus && previousStatus !== "USED") {
+                    showEntryConfirmationPopup(ticket);
+                } else if (ticket.status === "USED" && !previousStatus) {
+                    showEntryConfirmationPopup(ticket);
+                }
+            });
+        };
+
+        const fetchAndSyncTickets = async () => {
+            const tickets = await api.getMyTickets(token, bookingId || "");
+
+            if (!tickets.length) {
+                ticketsContainer.innerHTML = "<p>No tickets found for this booking.</p>";
+                return [];
+            }
+
+            if (!document.getElementById(`ticket-${tickets[0]._id}`)) {
+                ticketsContainer.innerHTML = tickets.map(buildTicketCard).join("");
+            }
+
+            syncTicketsState(tickets);
+            return tickets;
+        };
+
+        const init = async () => {
+            try {
+                await fetchAndSyncTickets();
+                ticketsPollInterval = window.setInterval(async () => {
+                    try {
+                        await fetchAndSyncTickets();
+                    } catch (error) {
+                        console.error("Ticket status polling failed:", error);
                     }
-                });
+                }, 4000);
             } catch (error) {
                 ticketsContainer.innerHTML = `<p>${error.message}</p>`;
             }
         };
+
+        entryConfirmationClose.addEventListener("click", closeEntryConfirmationPopup);
+        entryConfirmationModal.addEventListener("click", (event) => {
+            if (event.target === entryConfirmationModal) {
+                closeEntryConfirmationPopup();
+            }
+        });
+
+        window.addEventListener("beforeunload", () => {
+            if (ticketsPollInterval) {
+                window.clearInterval(ticketsPollInterval);
+            }
+        });
 
         init();
     </script>

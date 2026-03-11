@@ -11,6 +11,13 @@ const bookingController = {
       const { eventId } = req.body;
       const tickets = Number(req.body.tickets);
       const userId = req.user.userId;
+      const userRole = req.user.role;
+
+      if (userRole !== "user") {
+        return res.status(403).json({
+          message: "Only attendee accounts can book tickets.",
+        });
+      }
 
       if (!eventId || !Number.isInteger(tickets) || tickets <= 0) {
         return res

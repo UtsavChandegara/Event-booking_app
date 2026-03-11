@@ -76,6 +76,10 @@ app.use("/api/payments", paymentRoutes);
 const ticketRoutes = require("./routes/ticketRoutes");
 app.use("/api/tickets", ticketRoutes);
 
+// Experience Card Routes
+const cardRoutes = require("./routes/cardRoutes");
+app.use("/api/cards", cardRoutes);
+
 // Admin Routes
 const adminRoutes = require("./routes/adminRoutes");
 app.use("/api/admin", adminRoutes);

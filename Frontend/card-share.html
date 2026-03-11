@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shared Experience Card - Eventify</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .share-wrap {
+            max-width: 760px;
+            margin: 30px auto;
+            padding: 0 16px;
+        }
+        .card-shell {
+            border: 1px solid #e6e6e6;
+            border-radius: 16px;
+            background: #fff;
+            padding: 18px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+        .experience-card {
+            border-radius: 14px;
+            padding: 18px;
+            color: #fff;
+            width: min(100%, 440px);
+            aspect-ratio: 4 / 5;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+        }
+        .theme-stage { background: linear-gradient(135deg, #ff7a18, #af002d); }
+        .theme-crowd { background: linear-gradient(135deg, #f7971e, #ffd200); color: #222; }
+        .theme-neon { background: linear-gradient(135deg, #1d2b64, #f8cdda); }
+        .theme-backstage { background: linear-gradient(135deg, #434343, #000000); }
+        .theme-holo { background: linear-gradient(135deg, #36d1dc, #5b86e5); }
+        .card-chip-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: auto;
+            align-self: flex-start;
+            flex-wrap: wrap;
+        }
+        .chip {
+            display: inline-block;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-radius: 999px;
+            padding: 3px 8px;
+            margin-right: 6px;
+            font-size: 0.82rem;
+        }
+        #shared-card-shell {
+            display: grid;
+            gap: 14px;
+        }
+        .shared-card-preview-wrap {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <main class="share-wrap">
+        <div class="card-shell" id="shared-card-shell">
+            <div style="display: flex; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap;">
+                <button id="shared-card-back-btn" class="btn btn-secondary" type="button">Back</button>
+            </div>
+            <p>Loading shared card...</p>
+        </div>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script type="module" src="js/card-share.js"></script>
+</body>
+</html>

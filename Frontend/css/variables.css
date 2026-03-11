@@ -1,13 +1,19 @@
 :root {
-  /* Dark Cinematic Theme */
-  --bg-main: #0f172a; /* Slate 900 */
-  --bg-surface: #1e293b; /* Slate 800 */
-  
-  --primary-color: #6366f1; /* Indigo 500 */
-  --secondary-color: #818cf8; /* Indigo 400 */
+  /* Deep Ocean Theme */
+  --bg-main: #071321;
+  --bg-surface: #0f2136;
+  --bg-surface-2: #142b46;
 
-  --text-primary: #e2e8f0; /* Slate 200 */
-  --text-secondary: #94a3b8; /* Slate 400 */
+  --primary-color: #11b3a3;
+  --secondary-color: #22c55e;
+  --accent-color: #f59e0b;
+
+  --text-primary: #e7f0fb;
+  --text-secondary: #a7bed6;
+  --border-color: rgba(167, 190, 214, 0.22);
+
+  --danger-color: #ef4444;
+  --success-color: #22c55e;
 
   /* Radii */
   --radius-lg: 20px;
@@ -22,6 +28,6 @@
   --space-6: 48px;
 
   /* Shadows */
-  --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-soft: 0 10px 24px -16px rgba(6, 9, 14, 0.7);
+  --shadow-md: 0 22px 38px -24px rgba(6, 9, 14, 0.8);
 }

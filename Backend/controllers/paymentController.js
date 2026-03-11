@@ -9,6 +9,13 @@ const createPayment = async (req, res) => {
     const { eventId } = req.body;
     const tickets = Number(req.body.tickets);
     const userId = req.user.userId;
+    const userRole = req.user.role;
+
+    if (userRole !== "user") {
+      return res.status(403).json({
+        message: "Only attendee accounts can book tickets.",
+      });
+    }
 
     if (!eventId || !Number.isInteger(tickets) || tickets <= 0) {
       return res
@@ -64,6 +71,13 @@ const simulatePaymentOutcome = async (req, res) => {
     const { paymentId } = req.params;
     const { outcome } = req.body;
     const userId = req.user.userId;
+    const userRole = req.user.role;
+
+    if (userRole !== "user") {
+      return res.status(403).json({
+        message: "Only attendee accounts can book tickets.",
+      });
+    }
 
     if (!["success", "failed"].includes(outcome)) {
       return res

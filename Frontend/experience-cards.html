@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experience Cards - Eventify</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        .cards-page {
+            max-width: 1100px;
+            margin: 24px auto;
+            padding: 0 16px;
+        }
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 14px;
+            margin-top: 12px;
+        }
+        .box {
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            background: linear-gradient(160deg, var(--bg-surface), var(--bg-surface-2));
+            padding: 14px;
+            box-shadow: var(--shadow-soft);
+        }
+        .field {
+            display: grid;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .field select {
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: rgba(7, 19, 33, 0.6);
+            color: var(--text-primary);
+        }
+        .field input,
+        .field textarea {
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: rgba(7, 19, 33, 0.6);
+            color: var(--text-primary);
+        }
+        .experience-card {
+            border-radius: 14px;
+            padding: 18px;
+            color: #fff;
+            width: 100%;
+            aspect-ratio: 4 / 5;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            gap: 8px;
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
+            position: relative;
+        }
+        .theme-stage { background: linear-gradient(135deg, #ff7a18, #af002d); }
+        .theme-crowd { background: linear-gradient(135deg, #f7971e, #ffd200); color: #222; }
+        .theme-neon { background: linear-gradient(135deg, #1d2b64, #f8cdda); }
+        .theme-backstage { background: linear-gradient(135deg, #434343, #000000); }
+        .theme-holo { background: linear-gradient(135deg, #36d1dc, #5b86e5); }
+        .card-chip-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: auto;
+            align-self: flex-start;
+            flex-wrap: wrap;
+        }
+        .chip {
+            display: inline-block;
+            font-size: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-radius: 999px;
+            padding: 3px 8px;
+            margin-right: 6px;
+        }
+        .meta {
+            font-size: 0.9rem;
+            opacity: 0.95;
+        }
+        .section-title {
+            margin-top: 0;
+        }
+        .cards-empty-note {
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        .selfie-badge {
+            position: absolute;
+            right: 14px;
+            bottom: 14px;
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.85);
+            overflow: hidden;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.28);
+            background: rgba(255,255,255,0.15);
+        }
+        .selfie-badge img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .icon-btn {
+            width: 42px;
+            height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            padding: 0;
+        }
+        .card-preview-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1200;
+            padding: 20px;
+        }
+        .card-preview-shell {
+            width: min(560px, 94vw);
+            max-height: 92vh;
+            overflow: auto;
+            background: #0b1420;
+            border-radius: 18px;
+            padding: 18px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+        }
+        #card-preview-modal-body {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo">Eventify</a>
+            <nav>
+                <ul id="nav-links"></ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="cards-page">
+        <section class="box" style="margin-bottom: 14px;">
+            <h1 class="section-title">Experience Cards</h1>
+            <p>Choose between your unlocked slots and your created cards.</p>
+            <div class="account-tabs" style="margin-bottom: 0;">
+                <button id="view-unlocked-btn" class="tab-btn active">Unlocked Cards</button>
+                <button id="view-created-btn" class="tab-btn">Created Cards</button>
+            </div>
+            <p id="unlocked-unavailable-note" class="cards-empty-note" style="display: none;">
+                No unlocked slots available right now. Create cards from future verified entries.
+            </p>
+        </section>
+
+        <section id="unlocked-section" class="box">
+            <h2 class="section-title">Unlocked Cards</h2>
+            <p>Cards are available only after verified entry at the venue. Organizers can upload event place photos, and users can optionally upload a selfie for card generation references.</p>
+            <div id="eligible-cards" class="cards-grid">
+                <p>Loading unlocked slots...</p>
+            </div>
+        </section>
+
+        <section id="created-section" class="box" style="margin-top: 18px; display: none;">
+            <h2 class="section-title">Created Cards</h2>
+            <div id="my-cards" class="cards-grid">
+                <p>Loading your cards...</p>
+            </div>
+        </section>
+    </main>
+
+    <div id="card-preview-modal" class="card-preview-modal" aria-hidden="true">
+        <div class="card-preview-shell">
+            <div style="display: flex; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap;">
+                <button id="card-preview-back-btn" class="btn btn-secondary">Back</button>
+                <button id="card-preview-download-btn" class="btn btn-primary">Download</button>
+            </div>
+            <div id="card-preview-modal-body"></div>
+        </div>
+    </div>
+
+    <script type="module" src="js/nav.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script type="module" src="js/experience-cards.js"></script>
+</body>
+</html>

@@ -7,6 +7,18 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <style>
+        .organizer-options-wrap {
+            max-width: 1100px;
+            margin: 24px auto 0;
+            padding: 0 16px;
+        }
+
+        .event-form-wrap {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 0 16px 32px;
+        }
+
         .hybrid-input {
             position: relative;
         }
@@ -62,7 +74,17 @@
         </div>
     </header>
 
-    <div class="container" style="max-width: 700px;">
+    <section class="organizer-options-wrap">
+        <section id="organizer-dashboard-options" style="padding-top: 24px; padding-bottom: 0;">
+            <div class="account-tabs" style="margin-bottom: 16px;">
+                <a class="tab-btn" href="dashboard.html?organizerView=created-events" style="text-decoration: none;">1. Created Events</a>
+                <a class="tab-btn" href="dashboard.html?organizerView=experience-analytics" style="text-decoration: none;">2. Experience Analysis</a>
+                <a class="tab-btn active" href="create-event.html" style="text-decoration: none;">3. Create Event</a>
+            </div>
+        </section>
+    </section>
+
+    <div class="event-form-wrap">
         <h1>Create New Event</h1>
         <form id="eventForm" enctype="multipart/form-data" class="card">
             <div class="form-group">
@@ -108,6 +130,12 @@
             <div class="form-group">
                 <label>Event Image</label>
                 <input type="file" id="image" name="image" accept="image/*" required>
+            </div>
+
+            <div class="form-group">
+                <label>Event Place Reference Photos</label>
+                <input type="file" id="venueReferenceImages" name="venueReferenceImages" accept="image/*" multiple>
+                <small style="display: block; margin-top: 6px; color: #9ca3af;">Upload 1-4 venue photos. These help future AI-ready experience card generation and are used as event place references in the MVP.</small>
             </div>
 
             <div class="form-group">

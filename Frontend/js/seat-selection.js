@@ -16,9 +16,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function handleDirectBooking() {
   const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user") || "null");
   if (!token) {
     alert("Please log in to book an event.");
     window.location.href = "login.html";
+    return;
+  }
+  if (user && (user.role === "organizer" || user.role === "admin")) {
+    alert("Organizer/Admin accounts cannot book tickets.");
+    window.location.href = "events.html";
     return;
   }
 
@@ -42,8 +48,8 @@ async function handleDirectBooking() {
 
     alert(response.message || "Booking successful!");
 
-    // Redirect to the user's account page to see their new booking
-    window.location.href = "account.html";
+    // Redirect to the user's dashboard page to see their new booking
+    window.location.href = "dashboard.html";
   } catch (error) {
     console.error("Booking Error:", error);
     alert(error.message || "Booking failed. Please try again.");

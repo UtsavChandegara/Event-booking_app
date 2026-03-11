@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experience Analytics - Eventify</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .analytics-wrap {
+            max-width: 900px;
+            margin: 24px auto;
+            padding: 0 16px;
+        }
+        .panel {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: linear-gradient(160deg, var(--bg-surface), var(--bg-surface-2));
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow-soft);
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+        }
+        .stat {
+            background: rgba(7, 19, 33, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px;
+        }
+        .list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .chart-box {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            background: rgba(7, 19, 33, 0.6);
+        }
+        .analytics-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .analytics-table th,
+        .analytics-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .analytics-table thead th {
+            color: var(--text-primary);
+        }
+        .analytics-table tbody td {
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo">Eventify</a>
+            <nav>
+                <ul id="nav-links"></ul>
+            </nav>
+        </div>
+    </header>
+    <main class="analytics-wrap">
+        <div id="analytics-root" class="panel">
+            <p>Loading analytics...</p>
+        </div>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script type="module" src="js/nav.js"></script>
+    <script type="module" src="js/event-experience-analytics.js"></script>
+</body>
+</html>

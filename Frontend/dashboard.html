@@ -6,6 +6,137 @@
     <title>User Dashboard - Eventify</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .icon-btn {
+            width: 42px;
+            height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            padding: 0;
+        }
+        .dashboard-card-grid {
+            display: grid;
+            gap: 14px;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        }
+        #booked-events-container {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 360px));
+            justify-content: center;
+            align-items: start;
+        }
+        #created-events-container {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 360px));
+            justify-content: center;
+            align-items: start;
+        }
+        .dashboard-ticket-card {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .dashboard-ticket-image {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: block;
+            flex-shrink: 0;
+        }
+        .dashboard-ticket-card .event-card-content {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .dashboard-ticket-description {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: calc(1.4em * 3);
+        }
+        .dashboard-ticket-meta {
+            min-height: 52px;
+        }
+        .dashboard-created-event-stats {
+            min-height: 52px;
+            margin-top: 10px;
+            color: #28a745;
+            font-weight: 500;
+        }
+        #dashboard-cards-container {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 360px));
+            justify-content: center;
+            align-items: start;
+        }
+        .dashboard-card-shell {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .dashboard-card-box {
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            background: linear-gradient(160deg, var(--bg-surface), var(--bg-surface-2));
+            padding: 14px;
+            box-shadow: var(--shadow-soft);
+        }
+        .dashboard-card-field {
+            display: grid;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .dashboard-card-field select,
+        .dashboard-card-field input {
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: rgba(7, 19, 33, 0.6);
+            color: var(--text-primary);
+        }
+        .dashboard-experience-card {
+            width: 100%;
+            aspect-ratio: 4 / 5;
+            border-radius: 18px;
+            padding: 18px;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            gap: 10px;
+            min-height: 0;
+        }
+        .dashboard-card-shell .event-card-content {
+            padding-top: 0;
+        }
+        .dashboard-card-chip-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: auto;
+            flex-wrap: wrap;
+            align-self: flex-start;
+        }
+        .dashboard-card-chip {
+            border: 1px solid rgba(255,255,255,0.7);
+            border-radius: 999px;
+            padding: 3px 10px;
+            font-size: 12px;
+        }
+        .dashboard-preview-card-wrap {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -19,19 +150,63 @@
         </div>
     </header>
     <main>
+        <section id="user-dashboard-options" class="container" style="display: none; padding-top: 24px; padding-bottom: 0;">
+            <div class="account-tabs" style="margin-bottom: 16px;">
+                <button class="tab-btn active dashboard-view-btn" data-view="my-tickets">My Tickets</button>
+                <button class="tab-btn dashboard-view-btn" data-view="experience-cards">Experience Cards</button>
+                <button class="tab-btn dashboard-view-btn" data-view="past-tickets">Past Tickets</button>
+            </div>
+        </section>
+
+        <section id="organizer-dashboard-options" class="container" style="display: none; padding-top: 24px; padding-bottom: 0;">
+            <div class="account-tabs" style="margin-bottom: 16px;">
+                <button class="tab-btn active organizer-view-btn" data-view="created-events">1. Created Events</button>
+                <button class="tab-btn organizer-view-btn" data-view="experience-analytics">2. Experience Analysis</button>
+                <button class="tab-btn organizer-view-btn" data-view="create-event">3. Create Event</button>
+            </div>
+        </section>
+
         <section class="events-list">
             <div class="container">
-                <h1>My Bookings</h1>
+                <h1 id="booked-section-title">My Tickets</h1>
                 <div id="booked-events-container" class="events-grid">
                     <!-- Booked events will be dynamically loaded here -->
                 </div>
             </div>
         </section>
-        <section class="events-list" style="margin-top: 40px;">
+
+        <section id="experience-cards-dashboard-section" class="events-list" style="margin-top: 28px; display: none;">
+            <div class="container">
+                <h1>My Experience Cards</h1>
+                <div id="dashboard-experience-unlocked-wrap" style="display: none; margin-bottom: 20px;">
+                    <h2 style="margin-bottom: 10px;">Unlocked Cards</h2>
+                    <div id="dashboard-unlocked-cards-container" class="dashboard-card-grid">
+                        <!-- Unlocked cards will be dynamically loaded here -->
+                    </div>
+                </div>
+                <div>
+                    <h2 style="margin-bottom: 10px;">Created Cards</h2>
+                    <div id="dashboard-cards-container" class="events-grid">
+                        <!-- Experience cards will be dynamically loaded here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="created-events-section" class="events-list" style="margin-top: 40px;">
             <div class="container">
                 <h1>My Created Events</h1>
                 <div id="created-events-container" class="events-grid">
                     <!-- Created events will be dynamically loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <section id="organizer-analytics-section" class="events-list" style="margin-top: 28px; display: none;">
+            <div class="container">
+                <h1>Experience Analytics</h1>
+                <div id="organizer-analytics-container" class="events-grid">
+                    <!-- Organizer analytics shortcuts will be rendered here -->
                 </div>
             </div>
         </section>
@@ -52,7 +227,25 @@
             </div>
         </div>
     </div>
+    <div id="dashboard-card-preview-modal" class="modal">
+        <div class="modal-content" style="max-width: 640px;">
+            <div class="modal-header">
+                <h2>Card Preview</h2>
+                <span id="dashboard-card-preview-close" class="close-btn">&times;</span>
+            </div>
+            <div id="dashboard-card-preview-body" class="dashboard-preview-card-wrap"></div>
+            <div class="modal-footer" style="justify-content: space-between;">
+                <button id="dashboard-card-preview-back" class="btn btn-secondary" type="button">Back</button>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                    <button id="dashboard-card-preview-copy-link" class="btn btn-secondary" type="button">Copy Link</button>
+                    <button id="dashboard-card-preview-share-image" class="btn btn-secondary" type="button">Share Image</button>
+                    <button id="dashboard-card-preview-download" class="btn btn-primary" type="button">Download Image</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script type="module" src="js/nav.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script type="module" src="js/dashboard.js"></script>
 </body>
 </html>

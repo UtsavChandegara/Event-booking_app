@@ -30,9 +30,14 @@ exports.createEvent = async (req, res) => {
     } = req.body;
 
     let finalImageUrl = imageUrl ? imageUrl.trim() : imageUrl;
+    const uploadedImage = req.files?.image?.[0];
+    const uploadedVenueRefs =
+      req.files?.venueReferenceImages?.map((file) =>
+        file.path.replace(/\\/g, "/"),
+      ) || [];
 
-    if (req.file) {
-      finalImageUrl = req.file.path.replace(/\\/g, "/");
+    if (uploadedImage) {
+      finalImageUrl = uploadedImage.path.replace(/\\/g, "/");
     }
 
     if (!finalImageUrl) {
@@ -49,6 +54,7 @@ exports.createEvent = async (req, res) => {
       price,
       totalTickets,
       imageUrl: finalImageUrl,
+      venueReferenceImages: uploadedVenueRefs,
       createdBy: user.userId || user._id, // Use the id from the user object
     });
 
@@ -142,8 +148,14 @@ exports.updateEvent = async (req, res) => {
     }
 
     let finalImageUrl = event.imageUrl;
-    if (req.file) {
-      finalImageUrl = req.file.path.replace(/\\/g, "/");
+    const uploadedImage = req.files?.image?.[0];
+    const uploadedVenueRefs =
+      req.files?.venueReferenceImages?.map((file) =>
+        file.path.replace(/\\/g, "/"),
+      ) || [];
+
+    if (uploadedImage) {
+      finalImageUrl = uploadedImage.path.replace(/\\/g, "/");
     } else if (imageUrl) {
       finalImageUrl = imageUrl.trim();
     }
@@ -155,6 +167,9 @@ exports.updateEvent = async (req, res) => {
     event.price = price || event.price;
     event.totalTickets = totalTickets || event.totalTickets;
     event.imageUrl = finalImageUrl;
+    if (uploadedVenueRefs.length) {
+      event.venueReferenceImages = uploadedVenueRefs;
+    }
 
     await event.save();
     res.json(event);

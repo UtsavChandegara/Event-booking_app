@@ -32,13 +32,19 @@ router.get("/:id", eventController.getEventById);
 router.post(
   "/",
   authMiddleware,
-  upload.single("image"),
+  upload.fields([
+    { name: "image", maxCount: 1 },
+    { name: "venueReferenceImages", maxCount: 4 },
+  ]),
   eventController.createEvent,
 );
 router.put(
   "/:id",
   authMiddleware,
-  upload.single("image"),
+  upload.fields([
+    { name: "image", maxCount: 1 },
+    { name: "venueReferenceImages", maxCount: 4 },
+  ]),
   eventController.updateEvent,
 );
 router.delete("/:id", authMiddleware, eventController.deleteEvent);

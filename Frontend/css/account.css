@@ -14,8 +14,8 @@
 .btn-logout {
     margin-left: auto;
     background: none;
-    border: 1px solid #ef4444; /* red-500 */
-    color: #ef4444;
+    border: 1px solid var(--danger-color);
+    color: var(--danger-color);
     padding: var(--space-1) var(--space-3);
     border-radius: var(--radius-md);
     cursor: pointer;
@@ -23,7 +23,7 @@
 }
 
 .btn-logout:hover {
-    background-color: #ef4444;
+    background-color: var(--danger-color);
     color: white;
 }
 
@@ -35,8 +35,8 @@
 
 .filter-btn {
     padding: var(--space-1) var(--space-3);
-    border: 1px solid var(--bg-surface);
-    background: var(--bg-main);
+    border: 1px solid var(--border-color);
+    background: var(--bg-surface);
     color: var(--text-secondary);
     border-radius: var(--radius-md);
     cursor: pointer;
@@ -44,7 +44,7 @@
 
 .filter-btn.active, .filter-btn:hover {
     background: var(--primary-color);
-    color: white;
+    color: #052e2c;
     border-color: var(--primary-color);
 }
 

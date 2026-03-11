@@ -5,9 +5,10 @@
     max-width: 800px;
     margin: var(--space-6) auto;
     padding: var(--space-5);
-    background: var(--bg-surface);
+    background: linear-gradient(160deg, var(--bg-surface), var(--bg-surface-2));
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
     text-align: center;
 }
 
@@ -19,7 +20,7 @@
 .booking-summary {
     margin-top: var(--space-4);
     padding-top: var(--space-4);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid var(--border-color);
     text-align: center;
 }
 

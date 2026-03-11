@@ -27,6 +27,8 @@ document.addEventListener("DOMContentLoaded", () => {
             user &&
             (user.role === "admin" ||
               (event.createdBy && user._id === event.createdBy._id));
+          const isRestrictedBooker =
+            user && (user.role === "organizer" || user.role === "admin");
 
           let imageUrl = PLACEHOLDER_300x200;
           if (event.imageUrl) {
@@ -50,9 +52,11 @@ document.addEventListener("DOMContentLoaded", () => {
                         <p>${event.description}</p>
                         <div class="event-card-footer">
                             <span>${eventDate}</span>
-                            <button class="btn btn-primary book-btn" data-event-id="${
-                              event._id
-                            }">Book Now</button>
+                            ${
+                              isRestrictedBooker
+                                ? `<span class="btn btn-disabled" title="Organizer/Admin accounts cannot book tickets">Booking disabled</span>`
+                                : `<button class="btn btn-primary book-btn" data-event-id="${event._id}">Book Now</button>`
+                            }
                         </div>
                         ${
                           canManage
@@ -85,6 +89,10 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.href = "login.html";
         return;
       }
+      if (user && (user.role === "organizer" || user.role === "admin")) {
+        alert("Organizer/Admin accounts cannot book tickets.");
+        return;
+      }
 
       const eventId = bookBtn.dataset.eventId;
 
@@ -98,8 +106,8 @@ document.addEventListener("DOMContentLoaded", () => {
         bookBtn.classList.remove("btn-primary");
         bookBtn.classList.add("btn-success"); // You may need to add a .btn-success style
 
-        // Redirect to account page after a short delay
-        setTimeout(() => (window.location.href = "account.html"), 1500);
+        // Redirect to dashboard page after a short delay
+        setTimeout(() => (window.location.href = "dashboard.html"), 1500);
       } catch (error) {
         console.error("Booking Error:", error);
         bookBtn.disabled = false;

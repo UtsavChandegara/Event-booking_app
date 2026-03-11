@@ -77,12 +77,15 @@
                 const time = new Date(event.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
                 const availableTickets = (event.totalTickets || 0) - (event.bookedTickets || 0);
+                const isRestrictedBooker = user && (user.role === 'organizer' || user.role === 'admin');
                 // Determine if the current user is the event creator
                 const isCreator = user && event.createdBy && user._id === event.createdBy._id;
                 let actionButtonHtml = '';
 
                 if (isCreator) {
                     actionButtonHtml = `<p class="event-notice creator-notice">You cannot book tickets for your own event.</p>`;
+                } else if (isRestrictedBooker) {
+                    actionButtonHtml = `<p class="event-notice creator-notice">Organizer/Admin accounts cannot book tickets.</p>`;
                 } else if (availableTickets <= 0) {
                     actionButtonHtml = `<p class="event-notice sold-out-notice">Sold Out!</p>`;
                 } else {

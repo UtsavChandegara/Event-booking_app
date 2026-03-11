@@ -4,25 +4,48 @@
 /* --- Buttons --- */
 .btn {
     display: inline-block;
-    padding: var(--space-2) var(--space-4);
+    padding: 12px 18px;
     border-radius: var(--radius-md);
     font-weight: 600;
     text-align: center;
     cursor: pointer;
-    border: none;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid transparent;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+    letter-spacing: 0.01em;
 }
 
 .btn-primary {
-    background-image: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-    color: white;
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    background-image: linear-gradient(120deg, var(--primary-color), var(--secondary-color));
+    color: #052e2c;
+    box-shadow: 0 8px 20px -12px rgba(17, 179, 163, 0.75);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
-    color: white;
+    box-shadow: 0 16px 26px -16px rgba(17, 179, 163, 0.9);
+    color: #052e2c;
+}
+
+.btn-secondary {
+    background: var(--bg-surface-2);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    background: #183350;
+    color: var(--text-primary);
+}
+
+.btn-disabled,
+.btn:disabled {
+    background: #2b3d56;
+    border-color: #334a67;
+    color: #89a1ba;
+    cursor: not-allowed;
+    box-shadow: none;
+    pointer-events: none;
 }
 
 .btn-sm {
@@ -34,6 +57,7 @@
 .btn-danger {
     background: #dc2626; /* red-600 */
     color: white;
+    border-color: #ef4444;
 }
 
 .btn-danger:hover {
@@ -46,7 +70,7 @@
     background: var(--bg-surface);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-soft);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     display: flex;
     flex-direction: column;
@@ -142,7 +166,7 @@
 .tabs, .account-tabs {
     display: flex;
     gap: var(--space-1);
-    border-bottom: 1px solid var(--bg-surface);
+    border-bottom: 1px solid var(--border-color);
     margin-bottom: var(--space-4);
     align-items: center;
     flex-wrap: wrap;
@@ -214,7 +238,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--border-color);
     padding-bottom: var(--space-2);
     margin-bottom: var(--space-3);
 }

@@ -18,7 +18,8 @@
 
         .dummy-payment-card {
             width: min(460px, 92vw);
-            background: #fff;
+            background: #0f2136;
+            border: 1px solid rgba(167, 190, 214, 0.22);
             border-radius: 12px;
             box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2);
             padding: 20px;
@@ -30,7 +31,7 @@
 
         .dummy-payment-card p {
             margin: 0 0 8px;
-            color: #444;
+            color: #a7bed6;
         }
 
         .dummy-payment-actions {
@@ -43,7 +44,7 @@
         .dummy-status {
             margin-top: 12px;
             font-size: 0.95rem;
-            color: #222;
+            color: #e7f0fb;
         }
     </style>
 </head>
@@ -93,6 +94,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const BASE_URL = `${window.location.protocol}//${window.location.hostname}:3000/api`;
+            const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
 
             const urlParams = new URLSearchParams(window.location.search);
             const eventId = urlParams.get('eventId');
@@ -115,6 +117,13 @@
 
             if (!eventId) {
                 eventSubtitle.innerHTML = '<p style="color: red; text-align: center;">No Event ID provided.</p>';
+                return;
+            }
+            if (currentUser && (currentUser.role === 'organizer' || currentUser.role === 'admin')) {
+                eventTitleHeading.textContent = 'Booking Disabled';
+                eventSubtitle.innerHTML = '<p style="color: #dc2626; text-align: center;">Organizer/Admin accounts cannot book tickets.</p>';
+                checkoutBtn.disabled = true;
+                checkoutBtn.textContent = 'Not Allowed';
                 return;
             }
 
@@ -250,6 +259,10 @@
                 if (!token) {
                     alert('Please log in to proceed with the booking.');
                     window.location.href = 'login.html';
+                    return;
+                }
+                if (currentUser && (currentUser.role === 'organizer' || currentUser.role === 'admin')) {
+                    alert('Organizer/Admin accounts cannot book tickets.');
                     return;
                 }
 

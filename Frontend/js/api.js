@@ -280,6 +280,129 @@ const api = {
     }
     return data;
   },
+
+  getEligibleCards: async (token, bookingId = "") => {
+    const query = bookingId ? `?bookingId=${encodeURIComponent(bookingId)}` : "";
+    const response = await fetch(`${API_URL}/cards/eligible${query}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to fetch eligible cards");
+    }
+    return data;
+  },
+
+  createExperienceCard: async (payload, token) => {
+    const formData = new FormData();
+    formData.append("ticketId", payload.ticketId);
+    formData.append("mood", payload.mood);
+    formData.append("scene", payload.scene);
+    if (payload.stylePrompt) {
+      formData.append("stylePrompt", payload.stylePrompt);
+    }
+    if (payload.selfie instanceof File) {
+      formData.append("selfie", payload.selfie);
+    }
+
+    const response = await fetch(`${API_URL}/cards/create`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to create experience card");
+    }
+    return data;
+  },
+
+  getMyCards: async (token, bookingId = "") => {
+    const query = bookingId ? `?bookingId=${encodeURIComponent(bookingId)}` : "";
+    const response = await fetch(`${API_URL}/cards/my${query}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to fetch your cards");
+    }
+    return data;
+  },
+
+  markCardShared: async (cardId, token) => {
+    const response = await fetch(`${API_URL}/cards/${cardId}/share`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to mark card as shared");
+    }
+    return data;
+  },
+
+  markCardDownloaded: async (cardId, token) => {
+    const response = await fetch(`${API_URL}/cards/${cardId}/download`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to mark card as downloaded");
+    }
+    return data;
+  },
+
+  getSharedCard: async (shareToken) => {
+    const response = await fetch(
+      `${API_URL}/cards/share/${encodeURIComponent(shareToken)}`,
+    );
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to load shared card");
+    }
+    return data;
+  },
+
+  markSharedCardDownloaded: async (shareToken) => {
+    const response = await fetch(
+      `${API_URL}/cards/share/${encodeURIComponent(shareToken)}/download`,
+      {
+        method: "POST",
+      },
+    );
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to record shared download");
+    }
+    return data;
+  },
+
+  getExperienceAnalytics: async (eventId, token) => {
+    const response = await fetch(
+      `${API_URL}/cards/analytics/event/${encodeURIComponent(eventId)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to fetch experience analytics");
+    }
+    return data;
+  },
 };
 
 export default api;

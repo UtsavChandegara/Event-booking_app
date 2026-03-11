@@ -19,11 +19,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (token && user) {
     // --- User is Logged In ---
+    navLinksHTML += getLink("dashboard.html", "Dashboard");
     navLinksHTML += getLink("account.html", "My Account");
-
-    if (user.role === "organizer") {
-      navLinksHTML += getLink("create-event.html", "Create Event");
-    }
     if (user.role === "admin") {
       navLinksHTML += getLink("admin-dashboard.html", "Admin");
     }

@@ -23,6 +23,10 @@ const eventSchema = new mongoose.Schema(
       required: true,
     },
     imageUrl: String,
+    venueReferenceImages: {
+      type: [String],
+      default: [],
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

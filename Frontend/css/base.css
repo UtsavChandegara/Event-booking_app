@@ -13,6 +13,10 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: var(--bg-main);
+    background-image:
+        radial-gradient(circle at 10% 10%, rgba(17, 179, 163, 0.16), transparent 32%),
+        radial-gradient(circle at 90% 20%, rgba(245, 158, 11, 0.14), transparent 34%),
+        radial-gradient(circle at 35% 95%, rgba(34, 197, 94, 0.12), transparent 36%);
     color: var(--text-primary);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
