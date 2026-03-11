@@ -150,6 +150,8 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script type="module" src="js/nav.js"></script>
     <script>
+        const feedback = () => window.appFeedback;
+
         document.addEventListener('DOMContentLoaded', () => {
             const token = localStorage.getItem('token');
             const user = JSON.parse(localStorage.getItem('user'));
@@ -161,9 +163,12 @@
 
             // Role-based access control for the page
             if (user.role !== 'admin' && user.role !== 'organizer') {
-                alert('You are not authorized to create events. Become an organizer from your dashboard.');
-                window.location.href = 'dashboard.html';
-                return;
+                feedback().alert('You are not authorized to create events. Become an organizer from your dashboard.', {
+                    title: 'Access Denied',
+                    type: 'error'
+                }).then(() => {
+                    window.location.href = 'dashboard.html';
+                });
             }
         });
 
@@ -280,7 +285,10 @@
             e.preventDefault();
             const token = localStorage.getItem('token');
             if (!token) {
-                alert('You must be logged in to create an event.');
+                await feedback().alert('You must be logged in to create an event.', {
+                    title: 'Login Required',
+                    type: 'error'
+                });
                 window.location.href = 'login.html';
                 return;
             }
@@ -288,7 +296,10 @@
             const isoDate = parseDisplayDate(eventDateText.value.trim());
             const eventTime = parseDisplayTime(eventTimeText.value.trim());
             if (!isoDate || !eventTime) {
-                alert('Please enter date as DD-MM-YYYY and time as HH:mm (24-hour format).');
+                await feedback().alert('Please enter date as DD-MM-YYYY and time as HH:mm (24-hour format).', {
+                    title: 'Invalid Date or Time',
+                    type: 'error'
+                });
                 return;
             }
 
@@ -315,9 +326,15 @@
                 
                 window.location.href = `event-details.html?id=${data._id}&new=true`;
             } catch (error) {
-                alert(error.message);
+                await feedback().alert(error.message, {
+                    title: 'Create Event Failed',
+                    type: 'error'
+                });
             }
         });
     </script>
+    <script src="js/ui-feedback.js"></script>
 </body>
 </html>
+
+

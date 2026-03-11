@@ -1,5 +1,6 @@
 import api from "./api.js";
 const API_ORIGIN = `${window.location.protocol}//${window.location.hostname}:3000`;
+const feedback = () => window.appFeedback;
 const organizerInitialView =
   new URLSearchParams(window.location.search).get("organizerView") ||
   "created-events";
@@ -699,17 +700,27 @@ async function handleBookedEventsClick(e) {
 
   if (e.target.classList.contains("cancel-booking-btn")) {
     const bookingId = e.target.dataset.bookingId;
-    if (confirm("Are you sure you want to cancel this booking?")) {
-      try {
-        const token = localStorage.getItem("token");
-        await api.cancelBooking(bookingId, token);
-        document.getElementById(`booking-${bookingId}`)?.remove();
-        alert("Booking cancelled successfully.");
-        await loadBookedEvents("my-tickets");
-      } catch (error) {
-        console.error("Error cancelling booking:", error);
-        alert("Failed to cancel booking.");
-      }
+    const shouldCancel = await feedback().confirm(
+      "Are you sure you want to cancel this booking?",
+      {
+        title: "Cancel Booking",
+        type: "error",
+        confirmLabel: "Cancel Booking",
+      },
+    );
+    if (!shouldCancel) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      await api.cancelBooking(bookingId, token);
+      document.getElementById(`booking-${bookingId}`)?.remove();
+      alert("Booking cancelled successfully.");
+      await loadBookedEvents("my-tickets");
+    } catch (error) {
+      console.error("Error cancelling booking:", error);
+      alert("Failed to cancel booking.");
     }
   }
 }
@@ -741,7 +752,7 @@ async function handleDashboardCardsClick(e) {
         await navigator.clipboard.writeText(shareUrl);
         alert("Share link copied.");
       } else {
-        window.prompt("Copy this share link:", shareUrl);
+        await feedback().copy("Copy this share link.", shareUrl);
       }
       await loadDashboardExperienceCards();
     } catch (error) {
@@ -819,7 +830,7 @@ async function copyDashboardPreviewLink() {
       await navigator.clipboard.writeText(shareUrl);
       alert("Share link copied.");
     } else {
-      window.prompt("Copy this share link:", shareUrl);
+      await feedback().copy("Copy this share link.", shareUrl);
     }
     await loadDashboardExperienceCards();
   } catch (error) {
@@ -947,15 +958,25 @@ async function handleCreatedEventsClick(e) {
 
   if (target.classList.contains("delete-event-btn")) {
     const eventId = target.dataset.eventId;
-    if (confirm("Are you sure you want to delete this event?")) {
-      try {
-        await api.deleteEvent(eventId, token);
-        document.getElementById(`event-${eventId}`)?.remove();
-        alert("Event deleted successfully.");
-      } catch (error) {
-        console.error("Error deleting event:", error);
-        alert("Failed to delete event.");
-      }
+    const shouldDelete = await feedback().confirm(
+      "Are you sure you want to delete this event?",
+      {
+        title: "Delete Event",
+        type: "error",
+        confirmLabel: "Delete Event",
+      },
+    );
+    if (!shouldDelete) {
+      return;
+    }
+
+    try {
+      await api.deleteEvent(eventId, token);
+      document.getElementById(`event-${eventId}`)?.remove();
+      alert("Event deleted successfully.");
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      alert("Failed to delete event.");
     }
   }
 
@@ -1011,7 +1032,11 @@ async function handleRequestOrganizerRole() {
 
   try {
     const data = await api.requestOrganizerRole(token);
-    alert(data.message);
+    await feedback().alert(data.message, {
+      title: "Request Submitted",
+      type: "success",
+      confirmLabel: "Refresh",
+    });
     localStorage.setItem("user", JSON.stringify(data.user));
     window.location.reload();
   } catch (error) {

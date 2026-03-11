@@ -209,6 +209,42 @@ const api = {
     return response.json();
   },
 
+  createPaymentOrder: async (paymentData, token) => {
+    const response = await fetch(`${API_URL}/payments/create`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(paymentData),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to create payment order");
+    }
+
+    return data;
+  },
+
+  verifyPayment: async (payload, token) => {
+    const response = await fetch(`${API_URL}/payments/verify`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to verify payment");
+    }
+
+    return data;
+  },
+
   cancelBooking: async (bookingId, token) => {
     const response = await fetch(`${API_URL}/bookings/${bookingId}`, {
       method: "DELETE",

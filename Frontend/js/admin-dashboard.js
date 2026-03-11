@@ -1,4 +1,5 @@
 const BASE_URL = `${window.location.protocol}//${window.location.hostname}:3000/api`;
+const feedback = () => window.appFeedback;
 let currentEditEventId = null;
 let allEventsMap = new Map();
 let allRequestsMap = new Map();
@@ -56,13 +57,17 @@ function getHeaders() {
 
 // Show alert
 function showAlert(message, type = "info") {
-  const alertContainer = document.getElementById("alert-container");
-  const alert = document.createElement("div");
-  alert.className = `alert alert-${type}`;
-  alert.textContent = message;
-  alertContainer.innerHTML = "";
-  alertContainer.appendChild(alert);
-  setTimeout(() => alert.remove(), 5000);
+  const modalType =
+    type === "danger" ? "error" : type === "success" ? "success" : "info";
+  feedback().alert(message, {
+    title:
+      modalType === "error"
+        ? "Action Failed"
+        : modalType === "success"
+          ? "Action Completed"
+          : "Notice",
+    type: modalType,
+  });
 }
 
 // Load dashboard statistics
@@ -415,11 +420,15 @@ async function deleteEvent(id) {
     return;
   }
 
-  if (
-    !confirm(
-      `Are you sure you want to delete "${event.title}"? This will also cancel all associated bookings.`,
-    )
-  ) {
+  const shouldDelete = await feedback().confirm(
+    `Are you sure you want to delete "${event.title}"? This will also cancel all associated bookings.`,
+    {
+      title: "Delete Event",
+      type: "error",
+      confirmLabel: "Delete Event",
+    },
+  );
+  if (!shouldDelete) {
     return;
   }
 
@@ -506,11 +515,15 @@ async function viewEventBookings(eventId) {
 
 // Cancel booking
 async function cancelBooking(bookingId, eventTitle) {
-  if (
-    !confirm(
-      `Are you sure you want to cancel this booking for "${eventTitle}"?`,
-    )
-  ) {
+  const shouldCancel = await feedback().confirm(
+    `Are you sure you want to cancel this booking for "${eventTitle}"?`,
+    {
+      title: "Cancel Booking",
+      type: "error",
+      confirmLabel: "Cancel Booking",
+    },
+  );
+  if (!shouldCancel) {
     return;
   }
 
@@ -540,11 +553,15 @@ async function approveRequest(userId) {
     return;
   }
 
-  if (
-    !confirm(
-      `Are you sure you want to approve ${request.username} as an organizer?`,
-    )
-  ) {
+  const shouldApprove = await feedback().confirm(
+    `Are you sure you want to approve ${request.username} as an organizer?`,
+    {
+      title: "Approve Organizer",
+      type: "success",
+      confirmLabel: "Approve",
+    },
+  );
+  if (!shouldApprove) {
     return;
   }
 
@@ -577,9 +594,15 @@ async function rejectRequest(userId) {
     return;
   }
 
-  if (
-    !confirm(`Are you sure you want to reject ${request.username}'s request?`)
-  ) {
+  const shouldReject = await feedback().confirm(
+    `Are you sure you want to reject ${request.username}'s request?`,
+    {
+      title: "Reject Request",
+      type: "error",
+      confirmLabel: "Reject",
+    },
+  );
+  if (!shouldReject) {
     return;
   }
 

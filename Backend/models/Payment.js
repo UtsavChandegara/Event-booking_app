@@ -7,6 +7,15 @@ const paymentSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    orderId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    receipt: {
+      type: String,
+      sparse: true,
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -38,7 +47,15 @@ const paymentSchema = new mongoose.Schema(
     },
     provider: {
       type: String,
-      default: "dummy",
+      default: "razorpay",
+    },
+    razorpayPaymentId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    razorpaySignature: {
+      type: String,
     },
     booking: {
       type: mongoose.Schema.Types.ObjectId,

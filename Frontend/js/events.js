@@ -1,5 +1,6 @@
 import api from "./api.js";
 const API_ORIGIN = `${window.location.protocol}//${window.location.hostname}:3000`;
+const feedback = () => window.appFeedback;
 
 const PLACEHOLDER_300x200 = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22300%22%20height%3D%22200%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20200%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder%20text%20%7B%20fill%3A%23AAAAAA%3Bfont-weight%3Abold%3Bfont-family%3AArial%2C%20Helvetica%2C%20Open%20Sans%2C%20sans-serif%2C%20monospace%3Bfont-size%3A15pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder%22%3E%3Crect%20width%3D%22300%22%20height%3D%22200%22%20fill%3D%22%23EEEEEE%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%2294.5%22%20y%3D%22106%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E`;
 
@@ -85,7 +86,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const bookBtn = target;
 
       if (!token) {
-        alert("Please log in to book an event.");
+        await feedback().alert("Please log in to book an event.", {
+          title: "Login Required",
+          type: "error",
+        });
         window.location.href = "login.html";
         return;
       }
@@ -122,16 +126,26 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      if (confirm("Are you sure you want to delete this event?")) {
-        const eventId = target.dataset.eventId;
-        try {
-          await api.deleteEvent(eventId, token);
-          target.closest(".event-card").remove();
-          alert("Event deleted successfully.");
-        } catch (error) {
-          console.error("Error deleting event:", error);
-          alert("Failed to delete event.");
-        }
+      const shouldDelete = await feedback().confirm(
+        "Are you sure you want to delete this event?",
+        {
+          title: "Delete Event",
+          type: "error",
+          confirmLabel: "Delete Event",
+        },
+      );
+      if (!shouldDelete) {
+        return;
+      }
+
+      const eventId = target.dataset.eventId;
+      try {
+        await api.deleteEvent(eventId, token);
+        target.closest(".event-card").remove();
+        alert("Event deleted successfully.");
+      } catch (error) {
+        console.error("Error deleting event:", error);
+        alert("Failed to delete event.");
       }
     }
   });

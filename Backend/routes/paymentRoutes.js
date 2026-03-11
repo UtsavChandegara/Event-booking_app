@@ -5,14 +5,14 @@ const paymentController = require("../controllers/paymentController");
 const router = express.Router();
 
 // @route   POST /api/payments/create
-// @desc    Create a dummy payment request
+// @desc    Create a Razorpay order
 // @access  Private
 router.post("/create", auth, paymentController.createPayment);
 
-// @route   POST /api/payments/:paymentId/simulate
-// @desc    Simulate dummy payment success/failure
+// @route   POST /api/payments/verify
+// @desc    Verify a Razorpay payment and create booking
 // @access  Private
-router.post("/:paymentId/simulate", auth, paymentController.simulatePaymentOutcome);
+router.post("/verify", auth, paymentController.verifyPayment);
 
 // @route   GET /api/payments/:paymentId
 // @desc    Get payment status

@@ -138,6 +138,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script type="module" src="js/nav.js"></script>
     <script>
+        const feedback = () => window.appFeedback;
         const BASE_URL = `${window.location.protocol}//${window.location.hostname}:3000/api`;
         const urlParams = new URLSearchParams(window.location.search);
         const eventId = urlParams.get('id');
@@ -253,7 +254,10 @@
             }
 
             if (!eventId) {
-                alert('No event ID provided');
+                await feedback().alert('No event ID provided', {
+                    title: 'Missing Event',
+                    type: 'error'
+                });
                 window.location.href = 'dashboard.html';
                 return;
             }
@@ -280,7 +284,10 @@
                 document.getElementById('description').value = event.description;
             } catch (error) {
                 console.error(error);
-                alert('Error loading event details');
+                await feedback().alert('Error loading event details', {
+                    title: 'Load Failed',
+                    type: 'error'
+                });
             }
         });
 
@@ -292,7 +299,10 @@
             const eventTime = parseDisplayTime(eventTimeText.value.trim());
 
             if (!isoDate || !eventTime) {
-                alert('Please enter date as DD-MM-YYYY and time as HH:mm (24-hour format).');
+                await feedback().alert('Please enter date as DD-MM-YYYY and time as HH:mm (24-hour format).', {
+                    title: 'Invalid Date or Time',
+                    type: 'error'
+                });
                 return;
             }
 
@@ -308,15 +318,22 @@
 
                 if (!response.ok) throw new Error('Failed to update event');
                 
-                const modal = document.getElementById('successModal');
-                modal.classList.add('active');
-                document.getElementById('modalOkBtn').onclick = function() {
-                    window.location.href = `event-details.html?id=${eventId}`;
-                };
+                await feedback().alert('Event updated successfully.', {
+                    title: 'Success',
+                    type: 'success',
+                    confirmLabel: 'View Event'
+                });
+                window.location.href = `event-details.html?id=${eventId}`;
             } catch (error) {
-                alert(error.message);
+                await feedback().alert(error.message, {
+                    title: 'Update Failed',
+                    type: 'error'
+                });
             }
         });
     </script>
+    <script src="js/ui-feedback.js"></script>
 </body>
 </html>
+
+

@@ -1,4 +1,5 @@
 import api from "./api.js";
+const feedback = () => window.appFeedback;
 
 const token = localStorage.getItem("token");
 const user = JSON.parse(localStorage.getItem("user") || "null");
@@ -242,7 +243,7 @@ async function copyShareLink(cardId, shareToken) {
       await navigator.clipboard.writeText(shareUrl);
       alert("Share link created and copied.");
     } else {
-      window.prompt("Copy this share link:", shareUrl);
+      await feedback().copy("Copy this share link.", shareUrl);
     }
 
     await loadMyCards();
